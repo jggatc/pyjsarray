@@ -35,32 +35,30 @@ class PyTypedArray:
         PyFloat64Array          [Float64Array]
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data, offset=0, length=None, typedarray=None):
         """
         The PyTypedArray is instantiated with either the array size, an array of the TypedArray or Python type, or an existing ArrayBuffer to view, which creates a new TypedArray of size and included data as the specified type. Optional arguments include offset index at which ArrayBuffer data is inserted and length of an ArrayBuffer. The PyTypedArray interface to the TypedArray object include index syntax, iteration, and math operations.
         """
         if isinstance(data, int):
-            data = float(data)
-            JS("""@{{self}}['__array'] = new __typedarray(@{{data}});""")
+            self.__array = typedarray(float(data))
         elif isinstance(data, list):
             data = [float(dat) for dat in data]
-            data = data.getArray()
-            JS("""@{{self}}['__array'] = new __typedarray(@{{data}});""")
+            self.__array = typedarray(data.getArray())
         elif isinstance(data, PyTypedArray):
-            JS("""@{{self}}['__array'] = new __typedarray(@{{data}}['__array']);""")
+            self.__array = typedarray(data.__array)
         elif isinstance(data, tuple) and data[0] == 'subarray':
             self.__array = data[1]
         else:
             if length is None:
-                JS("""@{{self}}['__array'] = new __typedarray(@{{data}},@{{offset}});""")
+                self.__array = typedarray(data, offset)
             else:
-                JS("""@{{self}}['__array'] = new __typedarray(@{{data}},@{{offset}},@{{length}});""")
+                self.__array = typedarray(data, offset, length)
 
     def __str__(self):
         """
         Return string representation of PyTypedArray object.
         """
-        return JS("""@{{self}}['__array'].toString();""")
+        return self.__array.toString()
 
     def __getitem__(self, index):
         """
@@ -80,7 +78,7 @@ class PyTypedArray:
         """
         Get TypedArray array length.
         """
-        return JS("""@{{self}}['__array'].length;""")
+        return self.__array.length
 
     def set(self, data, offset=0):
         """
@@ -89,48 +87,48 @@ class PyTypedArray:
         if isinstance(data, list):
             data = [float(dat) for dat in data]
             data = data.getArray()
-            JS("""@{{self}}['__array'].set(@{{data}},@{{offset}});""")
+            self.__array.set(data, offset)
         elif isinstance(data, PyTypedArray):
-            JS("""@{{self}}['__array'].set(@{{data}}['__array'],@{{offset}});""")
+            self.__array.set(data.__array, offset)
 
     def subarray(self, begin, end=None):
         """
         Retrieve a subarray of the array. The subarray is a TypedArray and is a view of the derived array. Arguments begin and optional end (defaults to array end) are the index spanning the subarray.
         """
         if end is None:
-            end = JS("""@{{self}}['__array'].length;""")
-        array = JS("""@{{self}}['__array'].subarray(@{{begin}},@{{end}});""")
+            end = self.__array.length
+        array = self.__array.subarray(begin, end)
         return PyTypedArray(('subarray', array))
 
     def getLength(self):
         """
         Return array.length attribute.
         """
-        return JS("""@{{self}}['__array'].length;""")
+        return self.__array.length
 
     def getByteLength(self):
         """
         Return array.byteLength attribute.
         """
-        return JS("""@{{self}}['__array'].byteLength;""")
+        return self.__array.byteLength
 
     def getBuffer(self):
         """
         Return array.buffer attribute.
         """
-        return JS("""@{{self}}['__array'].buffer;""")
+        return self.__array.buffer
 
     def getByteOffset(self):
         """
         Return array.byteOffset attribute.
         """
-        return JS("""@{{self}}['__array'].byteOffset;""")
+        return self.__array.byteOffset
 
     def getBytesPerElement(self):
         """
         Return array.BYTES_PER_ELEMENT attribute.
         """
-        return JS("""@{{self}}['__array'].BYTES_PER_ELEMENT;""")
+        return self.__array.BYTES_PER_ELEMENT
 
     def getArray(self):
         """
@@ -145,8 +143,13 @@ class PyUint8ClampedArray(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Uint8ClampedArray;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Uint8ClampedArray)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyUint8Array(PyTypedArray):
@@ -155,8 +158,13 @@ class PyUint8Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Uint8Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Uint8Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyUint16Array(PyTypedArray):
@@ -165,8 +173,13 @@ class PyUint16Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Uint16Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Uint16Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyUint32Array(PyTypedArray):
@@ -175,8 +188,13 @@ class PyUint32Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Uint32Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Uint32Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyInt8Array(PyTypedArray):
@@ -185,8 +203,13 @@ class PyInt8Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Int8Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Int8Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyInt16Array(PyTypedArray):
@@ -195,8 +218,13 @@ class PyInt16Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Int16Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Int16Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyInt32Array(PyTypedArray):
@@ -205,8 +233,13 @@ class PyInt32Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Int32Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Int32Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
 
 class PyFloat32Array(PyTypedArray):
@@ -215,8 +248,13 @@ class PyFloat32Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Float32Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Float32Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
     def __getitem__(self, index):
         """
@@ -231,8 +269,13 @@ class PyFloat64Array(PyTypedArray):
     """
 
     def __init__(self, data, offset=0, length=None):
-        JS("""__typedarray = Float64Array;""")
-        PyTypedArray.__init__(self, data, offset, length)
+        try:
+            PyTypedArray.__init__(self, data, offset, length, typedarray=Float64Array)
+        except AttributeError:
+            if isUndefined(typedarray):
+                raise NotImplementedError, 'TypedArray data type not implemented'
+            else:
+                raise
 
     def __getitem__(self, index):
         """
