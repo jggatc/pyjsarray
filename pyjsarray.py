@@ -43,13 +43,11 @@ class PyTypedArray:
             data = float(data)
             JS("""@{{self}}['__array'] = new __typedarray(@{{data}});""")
         elif isinstance(data, list):
-            size = float( len(data)+offset )
-            JS("""@{{self}}['__array'] = new __typedarray(@{{size}});""")
-            for index, dat in enumerate(data):
-                dat = float(dat)
-                JS("""@{{self}}['__array'][@{{index}}+@{{offset}}] = @{{dat}};""")
+            data = [float(dat) for dat in data]
+            data = data.getArray()
+            JS("""@{{self}}['__array'] = new __typedarray(@{{data}});""")
         elif isinstance(data, PyTypedArray):
-            JS("""@{{self}}['__array'] = new __typedarray(@{{data}}['__array'],@{{offset}});""")
+            JS("""@{{self}}['__array'] = new __typedarray(@{{data}}['__array']);""")
         elif isinstance(data, tuple) and data[0] == 'subarray':
             self.__array = data[1]
         else:
@@ -89,12 +87,9 @@ class PyTypedArray:
         Set data to the array. Arguments: data is a list of either the TypedArray or Python type, offset is the start index where data will be set (defaults to 0).
         """
         if isinstance(data, list):
-            length = JS("""@{{self}}['__array'].length;""")
-            if len(data) > (length-offset):
-                JS("""throw RangeError("invalid array length");""")
-            for dat in data:
-                dat = float(dat)
-                JS("""@{{self}}['__array'][@{{offset}}++] = @{{dat}};""")
+            data = [float(dat) for dat in data]
+            data = data.getArray()
+            JS("""@{{self}}['__array'].set(@{{data}},@{{offset}});""")
         elif isinstance(data, PyTypedArray):
             JS("""@{{self}}['__array'].set(@{{data}}['__array'],@{{offset}});""")
 
