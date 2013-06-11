@@ -98,7 +98,7 @@ class PyTypedArray:
         if end is None:
             end = self.__array.length
         array = self.__array.subarray(begin, end)
-        return PyTypedArray(('subarray', array))
+        return self.__class__(('subarray', array))
 
     def getLength(self):
         """
