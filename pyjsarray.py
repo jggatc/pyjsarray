@@ -338,6 +338,25 @@ class Ndarray:
             self._shape = (len(dim),)
             self._indices = (self._shape[0],)
 
+    @property
+    def shape(self):        #not implemented in pyjs -O
+        """
+        Return array shape.
+        Ndarray.shape accessible with compilation in --strict mode.
+        """
+        return self._shape
+
+    @shape.setter
+    def shape(self, dim):    #not implemented in pyjs -O
+        """
+        Set shape of array.
+        Argument is new shape.
+        Raises TypeError if shape is not appropriate.
+        Ndarray.shape accessible with compilation in --strict mode.
+        """
+        self.setshape(dim)
+        return None
+
     def __getitem__(self, index):
         if isinstance(index, tuple):
             indexLn, shapeLn = len(index), len(self._shape)
@@ -774,7 +793,10 @@ class Ndarray:
         Set shape of array.
         Argument is new shape.
         Raises TypeError if shape is not appropriate.
+        Ndarray.shape accessible with compilation in --strict mode.
         """
+        if isinstance(dim[0], tuple):
+            dim = dim[0]
         size = 1
         for i in dim:
             size *= i
@@ -794,6 +816,7 @@ class Ndarray:
     def getshape(self):
         """
         Return array shape.
+        Ndarray.shape accessible with compilation in --strict mode.
         """
         return self._shape
 
