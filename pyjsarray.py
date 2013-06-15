@@ -42,45 +42,54 @@ class PyTypedArray:
         The PyTypedArray is instantiated with either the array size, an array of the TypedArray or Python type, or an existing ArrayBuffer to view, which creates a new TypedArray of size and included data as the specified type. Optional arguments include offset index at which ArrayBuffer data is inserted and length of an ArrayBuffer.
         """
         if isinstance(data, int):
-            self.__array = typedarray(float(data))
+            self.__data = typedarray(float(data))
         elif isinstance(data, list):
             data = [float(dat) for dat in data]
-            self.__array = typedarray(data.getArray())
+            self.__data = typedarray(data.getArray())
         elif isinstance(data, PyTypedArray):
-            self.__array = typedarray(data.__array)
+            self.__data = typedarray(data.__data)
         elif isinstance(data, tuple) and data[0] == 'subarray':
-            self.__array = data[1]
+            self.__data = data[1]
         else:
             if length is None:
-                self.__array = typedarray(data, offset)
+                self.__data = typedarray(data, offset)
             else:
-                self.__array = typedarray(data, offset, length)
+                self.__data = typedarray(data, offset, length)
 
     def __str__(self):
         """
         Return string representation of PyTypedArray object.
         """
-        return self.__array.toString()
+        return self.__data.toString()
+
+    def __iter__(self):
+        """
+        Iterate over PyTypedArray object.
+        """
+        index = 0
+        while index < self.__data.length:
+            yield self[index]
+            index += 1
 
     def __getitem__(self, index):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{int}}(@{{self}}['__array'][@{{index}}]);""")
+        return JS("""@{{int}}(@{{self}}['__data'][@{{index}}]);""")
 
     def __setitem__(self, index, value):
         """
         Set TypedArray element by index.
         """
         value = float(value)
-        JS("""@{{self}}['__array'][@{{index}}]=@{{value}};""")
+        JS("""@{{self}}['__data'][@{{index}}]=@{{value}};""")
         return None
 
     def __len__(self):
         """
         Get TypedArray array length.
         """
-        return self.__array.length
+        return self.__data.length
 
     def set(self, data, offset=0):
         """
@@ -89,54 +98,54 @@ class PyTypedArray:
         if isinstance(data, list):
             data = [float(dat) for dat in data]
             data = data.getArray()
-            self.__array.set(data, offset)
+            self.__data.set(data, offset)
         elif isinstance(data, PyTypedArray):
-            self.__array.set(data.__array, offset)
+            self.__data.set(data.__data, offset)
 
     def subarray(self, begin, end=None):
         """
         Retrieve a subarray of the array. The subarray is a TypedArray and is a view of the derived array. Arguments begin and optional end (defaults to array end) are the index spanning the subarray.
         """
         if end is None:
-            end = self.__array.length
-        array = self.__array.subarray(begin, end)
+            end = self.__data.length
+        array = self.__data.subarray(begin, end)
         return self.__class__(('subarray', array))
 
     def getLength(self):
         """
         Return array.length attribute.
         """
-        return self.__array.length
+        return self.__data.length
 
     def getByteLength(self):
         """
         Return array.byteLength attribute.
         """
-        return self.__array.byteLength
+        return self.__data.byteLength
 
     def getBuffer(self):
         """
         Return array.buffer attribute.
         """
-        return self.__array.buffer
+        return self.__data.buffer
 
     def getByteOffset(self):
         """
         Return array.byteOffset attribute.
         """
-        return self.__array.byteOffset
+        return self.__data.byteOffset
 
     def getBytesPerElement(self):
         """
         Return array.BYTES_PER_ELEMENT attribute.
         """
-        return self.__array.BYTES_PER_ELEMENT
+        return self.__data.BYTES_PER_ELEMENT
 
     def getArray(self):
         """
         Return JavaScript TypedArray.
         """
-        return self.__array
+        return self.__data
 
 
 class PyUint8ClampedArray(PyTypedArray):
@@ -262,7 +271,7 @@ class PyFloat32Array(PyTypedArray):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{self}}['__array'][@{{index}}];""")
+        return JS("""@{{self}}['__data'][@{{index}}];""")
 
 
 class PyFloat64Array(PyTypedArray):
@@ -283,7 +292,7 @@ class PyFloat64Array(PyTypedArray):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{self}}['__array'][@{{index}}];""")
+        return JS("""@{{self}}['__data'][@{{index}}];""")
 
 
 class Ndarray:
@@ -909,5 +918,5 @@ class Ndarray:
         """
         Return JavaScript TypedArray.
         """
-        return self.__data.__array
+        return self.__data.getArray()
 
