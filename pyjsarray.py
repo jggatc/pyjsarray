@@ -392,11 +392,42 @@ class Ndarray:
                 return array
 
     def __setitem__(self, index, value):
+        def unpack(obj, lst=None):
+            if lst is None:
+                lst = []
+            for element in obj:
+                if isinstance(element, (list,tuple)):
+                    unpack(element, lst)
+                else:
+                    lst.append(element)
+            return lst
         if isinstance(index, tuple):
-            self.__data[(index[0]*self._shape[0])+index[1]] = value
+            indexLn, shapeLn = len(index), len(self._shape)
+            if indexLn == shapeLn:
+                self.__data[sum([index[i]*self._indices[i] for i in range(indexLn)])] = value
+            else:
+                begin = sum([index[i]*self._indices[i] for i in range(indexLn)])
+                end = begin + self._indices[indexLn-1]
+                subarray = self.__data.subarray(begin, end)
+                if isinstance(value, Ndarray):
+                    value = value.__data
+                else:
+                    if isinstance(value[0], (list,tuple)):
+                        value = unpack(value)
+                subarray.set(value)
         else:
             if len(self._shape) == 1:
                 self.__data[index] = value
+            else:
+                begin = index * self._indices[0]
+                end = begin + self._indices[0]
+                subarray = self.__data.subarray(begin, end)
+                if isinstance(value, Ndarray):
+                    value = value.__data
+                else:
+                    if isinstance(value[0], (list,tuple)):
+                        value = unpack(value)
+                subarray.set(value)
         return None
 
     def __iter__(self):
