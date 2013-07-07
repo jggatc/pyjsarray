@@ -37,24 +37,30 @@ class PyTypedArray:
      The module also contains an Ndarray class to instantiate N-dimensional arrays.
     """
 
-    def __init__(self, data, offset=0, length=None, typedarray=None):
+    def __init__(self, data=None, offset=None, length=None, typedarray=None):
         """
         The PyTypedArray is instantiated with either the array size, an array of the TypedArray or Python type, or an existing ArrayBuffer to view, which creates a new TypedArray of size and included data as the specified type. Optional arguments include offset index at which ArrayBuffer data is inserted and length of an ArrayBuffer.
         """
-        if isinstance(data, int):
-            self.__data = typedarray(float(data))
-        elif isinstance(data, list):
-            data = [float(dat) for dat in data]
-            self.__data = typedarray(data.getArray())
-        elif isinstance(data, PyTypedArray):
-            self.__data = typedarray(data.__data)
-        elif isinstance(data, tuple) and data[0] == 'subarray':
-            self.__data = data[1]
+        if data:
+            if isinstance(data, int):
+                self.__data = typedarray(float(data))
+            elif isinstance(data, (list,tuple)):
+                data = [float(dat) for dat in data]
+                self.__data = typedarray(data.getArray())
+            elif isinstance(data, PyTypedArray):
+                self.__data = typedarray(data.__data)
+            else:   #TypedArray or ArrayBuffer
+                if offset is None and length is None:
+                    self.__data = typedarray(data)
+                else:
+                    if offset is None:
+                        offset = 0
+                    if length is None:
+                        self.__data = typedarray(data, offset)
+                    else:
+                        self.__data = typedarray(data, offset, length)
         else:
-            if length is None:
-                self.__data = typedarray(data, offset)
-            else:
-                self.__data = typedarray(data, offset, length)
+            self.__data = None
 
     def __str__(self):
         """
@@ -95,7 +101,7 @@ class PyTypedArray:
         """
         Set data to the array. Arguments: data is a list of either the TypedArray or Python type, offset is the start index where data will be set (defaults to 0).
         """
-        if isinstance(data, list):
+        if isinstance(data, (list,tuple)):
             data = [float(dat) for dat in data]
             data = data.getArray()
             self.__data.set(data, offset)
@@ -109,7 +115,9 @@ class PyTypedArray:
         if end is None:
             end = self.__data.length
         array = self.__data.subarray(begin, end)
-        return self.__class__(('subarray', array))
+        pytypedarray = self.__class__()
+        pytypedarray.__data = array
+        return pytypedarray
 
     def getLength(self):
         """
@@ -147,13 +155,20 @@ class PyTypedArray:
         """
         return self.__data
 
+    def setArray(self, array):
+        """
+        Set JavaScript TypedArray.
+        """
+        self.__data = array
+        return None
+
 
 class PyUint8ClampedArray(PyTypedArray):
     """
     Create a PyTypedArray interface to Uint8ClampedArray.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Uint8ClampedArray)
         except AttributeError:
@@ -168,7 +183,7 @@ class PyUint8Array(PyTypedArray):
     Create a PyTypedArray interface to Uint8Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Uint8Array)
         except AttributeError:
@@ -183,7 +198,7 @@ class PyUint16Array(PyTypedArray):
     Create a PyTypedArray interface to Uint16Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Uint16Array)
         except AttributeError:
@@ -198,7 +213,7 @@ class PyUint32Array(PyTypedArray):
     Create a PyTypedArray interface to Uint32Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Uint32Array)
         except AttributeError:
@@ -213,7 +228,7 @@ class PyInt8Array(PyTypedArray):
     Create a PyTypedArray interface to Int8Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Int8Array)
         except AttributeError:
@@ -228,7 +243,7 @@ class PyInt16Array(PyTypedArray):
     Create a PyTypedArray interface to Int16Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Int16Array)
         except AttributeError:
@@ -243,7 +258,7 @@ class PyInt32Array(PyTypedArray):
     Create a PyTypedArray interface to Int32Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Int32Array)
         except AttributeError:
@@ -258,7 +273,7 @@ class PyFloat32Array(PyTypedArray):
     Create a PyTypedArray interface to Float32Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Float32Array)
         except AttributeError:
@@ -279,7 +294,7 @@ class PyFloat64Array(PyTypedArray):
     Create a PyTypedArray interface to Float64Array.
     """
 
-    def __init__(self, data, offset=0, length=None):
+    def __init__(self, data=None, offset=None, length=None):
         try:
             PyTypedArray.__init__(self, data, offset, length, typedarray=Float64Array)
         except AttributeError:
