@@ -34,7 +34,7 @@ class PyTypedArray:
         PyFloat32Array          [Float32Array]
         PyFloat64Array          [Float64Array]
      The PyTypedArray interface include index syntax, iteration, and math operations.
-     The module also contains an Ndarray class to instantiate N-dimensional arrays.
+     The module contains an Ndarray class to instantiate N-dimensional arrays, and PyImageData and PyImageMatrix classes that provide an interface to canvas ImageData.
     """
 
     def __init__(self, data=None, offset=None, length=None, typedarray=None):
@@ -965,4 +965,128 @@ class Ndarray:
         Return JavaScript TypedArray.
         """
         return self.__data.getArray()
+
+
+class PyImageData:
+
+    def __init__(self, imagedata):
+        """
+        Provides an interface to canvas ImageData.
+        The argument required is the ImageData instance to be accessed.
+        """
+        self.__imagedata = imagedata
+        try:
+            self.data = PyUint8ClampedArray()
+        except NotImplementedError:     #CanvasPixelArray
+            self.data = PyTypedArray()
+        self.data.__data = imagedata.data
+        self.width = imagedata.width
+        self.height = imagedata.height
+
+    def getImageData(self):
+        """
+        Return JavaScript ImageData instance.
+        """
+        return self.__imagedata
+
+
+class PyImageMatrix(Ndarray):
+
+    def __init__(self, imagedata):
+        """
+        Provides an interface to canvas ImageData as an Ndarray array.
+        The argument required is the ImageData instance to be accessed.
+        """
+        self.__imagedata = PyImageData(imagedata)
+        try:
+            Ndarray.__init__(self, self.__imagedata.data, 0)
+        except NotImplementedError:     #ie10 supports typedarray, not uint8clampedarray
+            Ndarray.__init__(self, self.__imagedata.data, 1)
+        self.setshape(self.__imagedata.height,self.__imagedata.width,4)
+
+    def getWidth(self):
+        """
+        Return ImageData width.
+        """
+        return self.__imagedata.width
+
+    def getHeight(self):
+        """
+        Return ImageData height.
+        """
+        return self.__imagedata.height
+
+    def getPixel(self, index):
+        """
+        Get pixel RGBA.
+        The index arguement references the 2D array element.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        return (self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3])
+
+    def setPixel(self, index, value):
+        """
+        Set pixel RGBA.
+        The arguements index references the 2D array element and value is pixel RGBA.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3] = value[0], value[1], value[2], value[3]
+        return None
+
+    def getPixelRGB(self, index):
+        """
+        Get pixel RGB.
+        The index arguement references the 2D array element.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        return (self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2])
+
+    def setPixelRGB(self, index, value):
+        """
+        Set pixel RGB.
+        The arguements index references the 2D array element and value is pixel RGB.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2] = value[0], value[1], value[2]
+        return None
+
+    def getPixelAlpha(self, index):
+        """
+        Get pixel alpha.
+        The index arguement references the 2D array element.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        return self.__imagedata.data[i+3]
+
+    def setPixelAlpha(self, index, value):
+        """
+        Set pixel alpha.
+        The arguements index references the 2D array element and value is pixel alpha.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        self.__imagedata.data[i+3] = value
+        return None
+
+    def getPixelInteger(self, index):
+        """
+        Get pixel integer color.
+        The index arguement references the 2D array element.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        return self.__imagedata.data[i]<<16 | self.__imagedata.data[i+1]<<8 | self.__imagedata.data[i+2] | self.imagedata.data[i+3]<<24
+
+    def setPixelInteger(self, index, value):
+        """
+        Set pixel integer color.
+        The arguements index references the 2D array element and value is pixel color.
+        """
+        i = (index[0]*self._shape[0])+index[1]
+        self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3] = value>>16 & 0xff, value>>8 & 0xff, value & 0xff, value>>24 & 0xff
+        return None
+
+    def getImageData(self):
+        """
+        Return JavaScript ImageData instance.
+        """
+        return self.__imagedata.getImageData()
 
