@@ -1021,7 +1021,7 @@ class PyImageMatrix(Ndarray):
         Get pixel RGBA.
         The index arguement references the 2D array element.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         return (self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3])
 
     def setPixel(self, index, value):
@@ -1029,7 +1029,7 @@ class PyImageMatrix(Ndarray):
         Set pixel RGBA.
         The arguements index references the 2D array element and value is pixel RGBA.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3] = value[0], value[1], value[2], value[3]
         return None
 
@@ -1038,7 +1038,7 @@ class PyImageMatrix(Ndarray):
         Get pixel RGB.
         The index arguement references the 2D array element.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         return (self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2])
 
     def setPixelRGB(self, index, value):
@@ -1046,7 +1046,7 @@ class PyImageMatrix(Ndarray):
         Set pixel RGB.
         The arguements index references the 2D array element and value is pixel RGB.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2] = value[0], value[1], value[2]
         return None
 
@@ -1055,7 +1055,7 @@ class PyImageMatrix(Ndarray):
         Get pixel alpha.
         The index arguement references the 2D array element.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         return self.__imagedata.data[i+3]
 
     def setPixelAlpha(self, index, value):
@@ -1063,7 +1063,7 @@ class PyImageMatrix(Ndarray):
         Set pixel alpha.
         The arguements index references the 2D array element and value is pixel alpha.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         self.__imagedata.data[i+3] = value
         return None
 
@@ -1072,7 +1072,7 @@ class PyImageMatrix(Ndarray):
         Get pixel integer color.
         The index arguement references the 2D array element.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         return self.__imagedata.data[i]<<16 | self.__imagedata.data[i+1]<<8 | self.__imagedata.data[i+2] | self.imagedata.data[i+3]<<24
 
     def setPixelInteger(self, index, value):
@@ -1080,7 +1080,7 @@ class PyImageMatrix(Ndarray):
         Set pixel integer color.
         The arguements index references the 2D array element and value is pixel color.
         """
-        i = (index[0]*self._shape[0])+index[1]
+        i = (index[0]*self._indices[0]) + (index[1]*4)
         self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3] = value>>16 & 0xff, value>>8 & 0xff, value & 0xff, value>>24 & 0xff
         return None
 
