@@ -899,6 +899,34 @@ class Ndarray:
         array._indices = tuple(indices)
         return array
 
+    def set(self, data):
+        """
+        Set array elements.
+        Data argument can be a 1d/2d array or number used to set Ndarray elements, data used repetitively if consists of fewer elements than Ndarray.
+        """
+        if isinstance(data, (list,tuple)):
+            try:
+                data = [float(dat) for dat in data]
+            except ValueError:
+                data = [float(value) for dat in data for value in dat]
+            dataLn = len(data)
+            data = data.getArray()
+        elif isinstance(data, (Ndarray,PyTypedArray)):
+            data = data.getArray()
+            dataLn = data.length
+        else:
+            data = float(data)
+            for index in xrange(self.__data.__data.length):
+                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}};""")
+            return None
+        if dataLn == self.__data.__data.length:
+            for index in xrange(self.__data.__data.length):
+                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}}[@{{index}}];""")
+        else:
+            for index in xrange(self.__data.__data.length):
+                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}}[@{{index}}%@{{dataLn}}];""")
+        return None
+
     def fill(self, value):
         """
         Set array elements to value argument.
