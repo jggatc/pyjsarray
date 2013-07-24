@@ -382,8 +382,8 @@ class Ndarray:
         return None
 
     def __getitem__(self, index):
-        if isinstance(index, tuple):
-            indexLn, shapeLn = len(index), len(self._shape)
+        try:
+            indexLn, shapeLn = index.__len__(), len(self._shape)    #len(0) no exception
             if indexLn == shapeLn:
                 return self.__data[sum([index[i]*self._indices[i] for i in range(indexLn)])]
             else:
@@ -394,7 +394,7 @@ class Ndarray:
                 array._shape = self._shape[indexLn:]
                 array._indices = self._indices[indexLn:]
                 return array
-        else:
+        except (TypeError,AttributeError):  #index[i] if index is int raises both AttributeError -S and TypeError -O. No exception for len(index) if index is int.
             if len(self._shape) == 1:
                 return self.__data[index]
             else:
@@ -416,8 +416,8 @@ class Ndarray:
                 else:
                     lst.append(element)
             return lst
-        if isinstance(index, tuple):
-            indexLn, shapeLn = len(index), len(self._shape)
+        try:
+            indexLn, shapeLn = index.__len__(), len(self._shape)
             if indexLn == shapeLn:
                 self.__data[sum([index[i]*self._indices[i] for i in range(indexLn)])] = value
             else:
@@ -430,7 +430,7 @@ class Ndarray:
                     if isinstance(value[0], (list,tuple)):
                         value = unpack(value)
                 subarray.set(value)
-        else:
+        except (TypeError,AttributeError):
             if len(self._shape) == 1:
                 self.__data[index] = value
             else:
