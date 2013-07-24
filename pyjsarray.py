@@ -497,9 +497,9 @@ class Ndarray:
                     continue
                 else:
                     if count == 1:      #pyjs-O ' '*n > NaN
-                        alst[i] = '\n'+''.join([' ' for i in range(tab-count)])+alst[i]
+                        alst[i] = '\n'+''.join([' ' for x in range(tab-count)])+alst[i]
                     else:
-                        alst[i] = '\n\n'+''.join([' ' for i in range(tab-count)])+alst[i]
+                        alst[i] = '\n\n'+''.join([' ' for x in range(tab-count)])+alst[i]
                     i += count
                     break
         return ''.join(alst)
