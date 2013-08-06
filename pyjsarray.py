@@ -43,10 +43,16 @@ class PyTypedArray:
         """
         if data:
             if isinstance(data, int):
-                self.__data = typedarray(float(data))
+                if pyjs_mode.optimized:
+                    self.__data = typedarray(data)
+                else:
+                    self.__data = typedarray(data.valueOf())
             elif isinstance(data, (list,tuple)):
-                data = [float(dat) for dat in data]
-                self.__data = typedarray(data.getArray())
+                if pyjs_mode.optimized:
+                    self.__data = typedarray(data.getArray())
+                else:
+                    data = [dat.valueOf() for dat in data]
+                    self.__data = typedarray(data.getArray())
             elif isinstance(data, PyTypedArray):
                 self.__data = typedarray(data.__data)
             else:   #TypedArray or ArrayBuffer
@@ -87,8 +93,11 @@ class PyTypedArray:
         """
         Set TypedArray element by index.
         """
-        value = float(value)
-        JS("""@{{self}}['__data'][@{{index}}]=@{{value}};""")
+        if pyjs_mode.optimized:
+            JS("""@{{self}}['__data'][@{{index}}]=@{{value}};""")
+        else:
+            value = value.valueOf()
+            JS("""@{{self}}['__data'][@{{index}}]=@{{value}};""")
         return None
 
     def __len__(self):
@@ -102,9 +111,11 @@ class PyTypedArray:
         Set data to the array. Arguments: data is a list of either the TypedArray or Python type, offset is the start index where data will be set (defaults to 0).
         """
         if isinstance(data, (list,tuple)):
-            data = [float(dat) for dat in data]
-            data = data.getArray()
-            self.__data.set(data, offset)
+            if pyjs_mode.optimized:
+                self.__data.set(data.getArray(), offset)
+            else:
+                data = [dat.valueOf() for dat in data]
+                self.__data.set(data.getArray(), offset)
         elif isinstance(data, PyTypedArray):
             self.__data.set(data.__data, offset)
 
@@ -905,19 +916,27 @@ class Ndarray:
         Data argument can be a 1d/2d array or number used to set Ndarray elements, data used repetitively if consists of fewer elements than Ndarray.
         """
         if isinstance(data, (list,tuple)):
-            try:
-                data = [float(dat) for dat in data]
-            except ValueError:
-                data = [float(value) for dat in data for value in dat]
+            if pyjs_mode.optimized:
+                if isinstance(data[0], (list,tuple,PyTypedArray)):
+                    data = [value for dat in data for value in dat]
+            else:
+                if not isinstance(data[0], (list,tuple,PyTypedArray)):
+                    data = [dat.valueOf() for dat in data]
+                else:
+                    data = [value.valueOf() for dat in data for value in dat]
             dataLn = len(data)
             data = data.getArray()
         elif isinstance(data, (Ndarray,PyTypedArray)):
             data = data.getArray()
             dataLn = data.length
         else:
-            data = float(data)
-            for index in xrange(self.__data.__data.length):
-                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}};""")
+            if pyjs_mode.optimized:
+                for index in xrange(self.__data.__data.length):
+                    JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}};""")
+            else:
+                data = data.valueOf()
+                for index in xrange(self.__data.__data.length):
+                    JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}};""")
             return None
         if dataLn == self.__data.__data.length:
             for index in xrange(self.__data.__data.length):
@@ -931,9 +950,13 @@ class Ndarray:
         """
         Set array elements to value argument.
         """
-        value = float(value)
-        for index in xrange(len(self.__data)):
-            self.__data[index] = value
+        if pyjs_mode.optimized:
+            for index in xrange(self.__data.__data.length):
+                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{value}};""")
+        else:
+            value = value.valueOf()
+            for index in xrange(self.__data.__data.length):
+                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{value}};""")
         return None
 
     def copy(self):
@@ -1117,4 +1140,22 @@ class PyImageMatrix(Ndarray):
         Return JavaScript ImageData instance.
         """
         return self.__imagedata.getImageData()
+
+
+class Pyjs_Mode:
+
+    def __init__(self):
+        self.strict, self.optimized = self._setmode()
+
+    def __getattr__(self, attr):
+        if attr == '__strict_mode':
+            return True
+
+    def _setmode(self):
+        if self.__strict_mode == True:
+            return True, False
+        else:
+            return False, True
+
+pyjs_mode = Pyjs_Mode()
 
