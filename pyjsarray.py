@@ -321,7 +321,7 @@ class PyFloat64Array(PyTypedArray):
         return JS("""@{{self}}['__data'][@{{index}}];""")
 
 
-class PyCanvasPixelArray(PyTypedArray):     ###0.17
+class PyCanvasPixelArray(PyTypedArray):     ###
     """
     Create a PyTypedArray interface to CanvasPixelArray.
     """
@@ -518,6 +518,15 @@ class Ndarray:
                     if isinstance(value[0], (list,tuple)):
                         value = unpack(value)
                 subarray.set(value)
+        return None
+
+    def __getslice__(self, lower, upper):   ###
+        subarray = self.__data.subarray(lower, upper)
+        return Ndarray(subarray, self._dtype)
+
+    def __setslice__(self, lower, upper, data):     ###
+        subarray = self.__data.subarray(lower, upper)
+        subarray.set(data)
         return None
 
     def __iter__(self):
@@ -1090,7 +1099,7 @@ class PyImageData:
         The argument required is the ImageData instance to be accessed.
         """
         self.__imagedata = imagedata
-        if not isUndefined(Uint8ClampedArray):      ###0.17
+        if not isUndefined(Uint8ClampedArray):      ###
             self.data = PyUint8ClampedArray()
         else:
             self.data = PyCanvasPixelArray()
@@ -1113,7 +1122,7 @@ class PyImageMatrix(Ndarray):
         The argument required is the ImageData instance to be accessed.
         """
         self.__imagedata = PyImageData(imagedata)
-        if isinstance(self.__imagedata.data, PyUint8ClampedArray):      ###0.17
+        if isinstance(self.__imagedata.data, PyUint8ClampedArray):      ###
             Ndarray.__init__(self, self.__imagedata.data, 0)
         else:     #ie10 supports typedarray, not uint8clampedarray
             Ndarray.__init__(self, self.__imagedata.data, 1)
