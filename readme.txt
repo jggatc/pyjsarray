@@ -1,4 +1,4 @@
-PyjsArray
+PyjsArray - Python-to-JavaScript TypedArray Module
 
 The PyjsArray module provides Python objects that wrap the JavaScript TypedArray objects. The module also includes an Ndarray class to instantiate N-dimensional arrays, and PyImageData and PyImageMatrix classes that provide an interface to canvas ImageData. It was designed for use in Python-to-JavaScript applications that are translated with the Pyjs compiler (http://pyjs.org). The module provides the following TypedArray objects:
 
@@ -13,4 +13,8 @@ The PyjsArray module provides Python objects that wrap the JavaScript TypedArray
     PyInt32Array            [Int32Array]
     PyFloat32Array          [Float32Array]
     PyFloat64Array          [Float64Array]
- 
+
+PyjsArray is released under LGPL, see license.txt for further information.
+
+PyjsArray docs: http://gatc.ca/projects/pyjsdl/doc/
+
