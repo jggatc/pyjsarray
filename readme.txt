@@ -14,7 +14,7 @@ The PyjsArray module provides Python objects that wrap the JavaScript TypedArray
     PyFloat32Array          [Float32Array]
     PyFloat64Array          [Float64Array]
 
-PyjsArray is released under LGPL, see license.txt for further information.
+PyjsArray is released under the MIT License, see license.txt for further information.
 
 PyjsArray docs: http://gatc.ca/projects/pyjsdl/doc/
 
