@@ -1767,6 +1767,16 @@ class BitSet32(BitSet):
         BitSet.__init__(self, width)
 
 
+def typeOf(obj):
+    """
+    Return typeof obj.
+    """
+    if pyjs_mode.optimized:
+        return JS("""typeof @{{obj}};""")
+    else:
+        return JS("""typeof @{{obj}}['valueOf']();""")
+
+
 class Pyjs_Mode(object):
 
     def __init__(self):
