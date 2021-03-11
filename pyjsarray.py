@@ -1,6 +1,3 @@
-#Pyjsdl - Copyright (C) 2013 James Garnon <http://gatc.ca/>
-#Released under the MIT License <http://opensource.org/licenses/MIT>
-
 #PyjsArray - Python-to-JavaScript TypedArray Module
 #Copyright (c) 2013 James Garnon
 
