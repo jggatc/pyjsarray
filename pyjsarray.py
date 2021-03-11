@@ -23,7 +23,10 @@
 #Project Site: http://gatc.ca/
 
 from math import ceil as _ceil
-from __pyjamas__ import JS
+try:
+    from __pyjamas__ import JS
+except ImportError:
+    pass
 import sys
 if sys.version_info < (3,):
     range = xrange
