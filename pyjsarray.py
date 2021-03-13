@@ -41,15 +41,15 @@ class TypedArray(object):
     The module contains an Ndarray class to instantiate N-dimensional arrays, ImageData and ImageMatrix classes that provide an interface to canvas ImageData, and BitSet classes that implement a bit array.
     """
 
-    _array = { 'Uint8ClampedArray': Uint8ClampedArray,
-               'Uint8Array':        Uint8Array,
-               'Uint16Array':       Uint16Array,
-               'Uint32Array':       Uint32Array,
-               'Int8Array':         Int8Array,
-               'Int16Array':        Int16Array,
-               'Int32Array':        Int32Array,
-               'Float32Array':      Float32Array,
-               'Float64Array':      Float64Array }
+    __obj = { 'Uint8ClampedArray': Uint8ClampedArray,
+              'Uint8Array':        Uint8Array,
+              'Uint16Array':       Uint16Array,
+              'Uint32Array':       Uint32Array,
+              'Int8Array':         Int8Array,
+              'Int16Array':        Int16Array,
+              'Int32Array':        Int32Array,
+              'Float32Array':      Float32Array,
+              'Float64Array':      Float64Array }
 
     def __init__(self, data=None, offset=None, length=None, typedarray=None):
         """
@@ -140,9 +140,9 @@ class TypedArray(object):
         if end is None:
             end = self.__data.length
         array = self.__data.subarray(begin, end)
-        pytypedarray = self.__class__()
-        pytypedarray.__data = array
-        return pytypedarray
+        typedarray = self.__class__()
+        typedarray.__data = array
+        return typedarray
 
     def getLength(self):
         """
@@ -195,7 +195,7 @@ class Uint8ClampedArray(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Uint8ClampedArray']
+            typedarray = TypedArray.__obj['Uint8ClampedArray']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):     #-O/-S:TypeError/AttributeError
             if isUndefined(typedarray):
@@ -211,7 +211,7 @@ class Uint8Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Uint8Array']
+            typedarray = TypedArray.__obj['Uint8Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -227,7 +227,7 @@ class Uint16Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Uint16Array']
+            typedarray = TypedArray.__obj['Uint16Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -243,7 +243,7 @@ class Uint32Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Uint32Array']
+            typedarray = TypedArray.__obj['Uint32Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -259,7 +259,7 @@ class Int8Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Int8Array']
+            typedarray = TypedArray.__obj['Int8Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -275,7 +275,7 @@ class Int16Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Int16Array']
+            typedarray = TypedArray.__obj['Int16Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -291,7 +291,7 @@ class Int32Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Int32Array']
+            typedarray = TypedArray.__obj['Int32Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -307,7 +307,7 @@ class Float32Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Float32Array']
+            typedarray = TypedArray.__obj['Float32Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -329,7 +329,7 @@ class Float64Array(TypedArray):
 
     def __init__(self, data=None, offset=None, length=None):
         try:
-            typedarray = TypedArray._array['Float64Array']
+            typedarray = TypedArray.__obj['Float64Array']
             TypedArray.__init__(self, data, offset, length, typedarray)
         except (TypeError, AttributeError):
             if isUndefined(typedarray):
@@ -410,25 +410,25 @@ class CanvasPixelArray(TypedArray):
 
 class Ndarray(object):
 
-    _typedarray = { 'uint8c':  Uint8ClampedArray,
-                    'int8':    Int8Array,
-                    'uint8':   Uint8Array,
-                    'int16':   Int16Array,
-                    'uint16':  Uint16Array,
-                    'int32':   Int32Array,
-                    'uint32':  Uint32Array,
-                    'float32': Float32Array,
-                    'float64': Float64Array }
+    __typedarray = { 'uint8c':  Uint8ClampedArray,
+                     'int8':    Int8Array,
+                     'uint8':   Uint8Array,
+                     'int16':   Int16Array,
+                     'uint16':  Uint16Array,
+                     'int32':   Int32Array,
+                     'uint32':  Uint32Array,
+                     'float32': Float32Array,
+                     'float64': Float64Array }
 
-    _dtypes = { 'uint8c':'uint8c', 'x':'uint8c', 0:'uint8c',
-                'int8':'int8', 'b':'int8', 4:'int8',
-                'uint8':'uint8', 'B':'uint8', 1:'uint8',
-                'int16':'int16', 'h':'int16', 5:'int16',
-                'uint16':'uint16', 'H':'uint16', 2:'uint16',
-                'int32':'int32', 'i':'int32', 6:'int32',
-                'uint32':'uint32', 'I':'uint32', 3:'uint32',
-                'float32':'float32', 'f':'float32', 7:'float32',
-                'float64':'float64', 'd':'float64', 8:'float64' }
+    __dtypes = { 'uint8c':'uint8c', 'x':'uint8c', 0:'uint8c',
+                 'int8':'int8', 'b':'int8', 4:'int8',
+                 'uint8':'uint8', 'B':'uint8', 1:'uint8',
+                 'int16':'int16', 'h':'int16', 5:'int16',
+                 'uint16':'uint16', 'H':'uint16', 2:'uint16',
+                 'int32':'int32', 'i':'int32', 6:'int32',
+                 'uint32':'uint32', 'I':'uint32', 3:'uint32',
+                 'float32':'float32', 'f':'float32', 7:'float32',
+                 'float64':'float64', 'd':'float64', 8:'float64' }
 
     def __init__(self, dim, dtype='float64'):
         """
@@ -445,8 +445,8 @@ class Ndarray(object):
                 'float32'   Float32Array
                 'float64'   Float64Array
         """
-        self._dtype = self._dtypes[dtype]
-        typedarray = self._typedarray[self._dtype]
+        self._dtype = self.__dtypes[dtype]
+        typedarray = self.__typedarray[self._dtype]
         if isinstance(dim, tuple):
             size = 1
             for i in dim:
@@ -1288,7 +1288,7 @@ class Ndarray(object):
         Return copy of array.
         Argument dtype is TypedArray data type.
         """
-        typedarray = self._typedarray[self._dtypes[dtype]]
+        typedarray = self.__typedarray[self.__dtypes[dtype]]
         array = typedarray(self.__data)
         ndarray = Ndarray(array, dtype)
         ndarray._shape = self._shape
@@ -1373,7 +1373,7 @@ class ImageData(object):
         The argument required is the ImageData instance to be accessed.
         """
         self.__imagedata = imagedata
-        if not isUndefined(TypedArray._array['Uint8ClampedArray']):
+        if not isUndefined(TypedArray.__obj['Uint8ClampedArray']):
             self.data = Uint8ClampedArray()
         else:
             self.data = CanvasPixelArray()
