@@ -38,11 +38,18 @@ class TypedArray(object):
     TypedArray is the base class that wraps the JavaScript TypedArray objects.
     The derived objects provides an interface to the JavaScript array objects.
     Typedarray implemented: Uint8ClampedArray, Uint8Array, Uint16Array, Uint32Array, Int8Array, Int16Array, Int32Array, Float32Array, Float64Array.
-     The TypedArray interface include index syntax, iteration, and math operations.
-     The module contains an Ndarray class to instantiate N-dimensional arrays, ImageData and ImageMatrix classes that provide an interface to canvas ImageData, and BitSet classes that implement a bit array.
+    The module contains an Ndarray class to instantiate N-dimensional arrays, ImageData and ImageMatrix classes that provide an interface to canvas ImageData, and BitSet classes that implement a bit array.
     """
 
-    _array = None
+    _array = { 'Uint8ClampedArray': Uint8ClampedArray,
+               'Uint8Array':        Uint8Array,
+               'Uint16Array':       Uint16Array,
+               'Uint32Array':       Uint32Array,
+               'Int8Array':         Int8Array,
+               'Int16Array':        Int16Array,
+               'Int32Array':        Int32Array,
+               'Float32Array':      Float32Array,
+               'Float64Array':      Float64Array }
 
     def __init__(self, data=None, offset=None, length=None, typedarray=None):
         """
@@ -74,19 +81,6 @@ class TypedArray(object):
                         self.__data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}}, @{{length}})""")
         else:
             self.__data = None
-
-    @classmethod
-    def _init(cls):
-        if not cls._array:
-            cls._array = { 'Uint8ClampedArray': Uint8ClampedArray,
-                           'Uint8Array': Uint8Array,
-                           'Uint16Array': Uint16Array,
-                           'Uint32Array': Uint32Array,
-                           'Int8Array': Int8Array,
-                           'Int16Array': Int16Array,
-                           'Int32Array': Int32Array,
-                           'Float32Array': Float32Array,
-                           'Float64Array': Float64Array }
 
     def __str__(self):
         """
@@ -192,9 +186,6 @@ class TypedArray(object):
         """
         self.__data = array
         return None
-
-
-TypedArray._init()
 
 
 class Uint8ClampedArray(TypedArray):
@@ -419,23 +410,43 @@ class CanvasPixelArray(TypedArray):
 
 class Ndarray(object):
 
-    def __init__(self, dim, dtype=8):
+    _typedarray = { 'uint8c':  Uint8ClampedArray,
+                    'int8':    Int8Array,
+                    'uint8':   Uint8Array,
+                    'int16':   Int16Array,
+                    'uint16':  Uint16Array,
+                    'int32':   Int32Array,
+                    'uint32':  Uint32Array,
+                    'float32': Float32Array,
+                    'float64': Float64Array }
+
+    _dtypes = { 'uint8c':'uint8c', 'x':'uint8c', 0:'uint8c',
+                'int8':'int8', 'b':'int8', 4:'int8',
+                'uint8':'uint8', 'B':'uint8', 1:'uint8',
+                'int16':'int16', 'h':'int16', 5:'int16',
+                'uint16':'uint16', 'H':'uint16', 2:'uint16',
+                'int32':'int32', 'i':'int32', 6:'int32',
+                'uint32':'uint32', 'I':'uint32', 3:'uint32',
+                'float32':'float32', 'f':'float32', 7:'float32',
+                'float64':'float64', 'd':'float64', 8:'float64' }
+
+    def __init__(self, dim, dtype='float64'):
         """
         Generate an N-dimensional array of TypedArray data.
         Argument can be size (int or tuple) or data (list or TypedArray).
-        Optional argument dtype (default:8) specifies TypedArray data type:
-            0: Uint8ClampedArray
-            1: Uint8Array
-            2: Uint16Array
-            3: Uint32Array
-            4: Int8Array
-            5: Int16Array
-            6: Int32Array
-            7: Float32Array
-            8: Float64Array
+        Optional argument dtype specifies TypedArray data type:
+                'uint8c'    Uint8ClampedArray
+                'int8'      Int8Array
+                'uint8'     Uint8Array
+                'int16'     Int16Array
+                'uint16'    Uint16Array
+                'int32'     Int32Array
+                'uint32'    Uint32Array
+                'float32'   Float32Array
+                'float64'   Float64Array
         """
-        self._dtype = dtype
-        typedarray = self._typedarray(dtype)
+        self._dtype = self._dtypes[dtype]
+        typedarray = self._typedarray[self._dtype]
         if isinstance(dim, tuple):
             size = 1
             for i in dim:
@@ -466,19 +477,6 @@ class Ndarray(object):
             self.__data = dim
             self._shape = (len(dim),)
             self._indices = (self._shape[0],)
-
-    @staticmethod
-    def _typedarray(dtype):
-        typedarray = {0: Uint8ClampedArray,
-                      1: Uint8Array,
-                      2: Uint16Array,
-                      3: Uint32Array,
-                      4: Int8Array,
-                      5: Int16Array,
-                      6: Int32Array,
-                      7: Float32Array,
-                      8: Float64Array}
-        return typedarray[dtype]
 
     @property
     def shape(self):        #not implemented in pyjs -O
@@ -605,7 +603,7 @@ class Ndarray(object):
                 index += 1
 
     def _array_dim(self):
-        if self._dtype < 7:
+        if 'int' in self._dtype:
             vmax = len(str(max(self.__data)))
             vmin = len(str(min(self.__data)))
             vlen = {True:vmax, False:vmin}[vmax>vmin]
@@ -647,13 +645,13 @@ class Ndarray(object):
         sl = len(self._shape)
         for d in range(1, sl):
             s = s.replace(' '+'['*d, '\n'+' '*(sl+8-d)+'['*d)
-        return 'Ndarray(%s, dtype=%d)' % (s, self._dtype)
+        return 'Ndarray(%s, dtype=%s)' % (s, repr(self._dtype))
 
     def __len__(self):
         return self._shape[0]
 
     def __lt__(self, other):
-        ndarray = Ndarray(len(self.__data), 1)
+        ndarray = Ndarray(len(self.__data), 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         ndarray_data = ndarray.__data
@@ -668,7 +666,7 @@ class Ndarray(object):
         return ndarray
 
     def __le__(self, other):
-        ndarray = Ndarray(self._shape, 1)
+        ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         ndarray_data = ndarray.__data
@@ -683,7 +681,7 @@ class Ndarray(object):
         return ndarray
     
     def __eq__(self, other):
-        ndarray = Ndarray(self._shape, 1)
+        ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         ndarray_data = ndarray.__data
@@ -698,7 +696,7 @@ class Ndarray(object):
         return ndarray
     
     def __ne__(self, other):
-        ndarray = Ndarray(self._shape, 1)
+        ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         ndarray_data = ndarray.__data
@@ -713,7 +711,7 @@ class Ndarray(object):
         return ndarray
     
     def __gt__(self, other):
-        ndarray = Ndarray(self._shape, 1)
+        ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         ndarray_data = ndarray.__data
@@ -728,7 +726,7 @@ class Ndarray(object):
         return ndarray
 
     def __ge__(self, other):
-        ndarray = Ndarray(self._shape, 1)
+        ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         ndarray_data = ndarray.__data
@@ -1290,7 +1288,7 @@ class Ndarray(object):
         Return copy of array.
         Argument dtype is TypedArray data type.
         """
-        typedarray = self._typedarray(dtype)
+        typedarray = self._typedarray[self._dtypes[dtype]]
         array = typedarray(self.__data)
         ndarray = Ndarray(array, dtype)
         ndarray._shape = self._shape
@@ -1351,8 +1349,6 @@ class Ndarray(object):
 class NP(object):
 
     def zeros(self, size, dtype):
-        if dtype == 'i':
-            dtype = 3
         return Ndarray(size, dtype)
 
     def swapaxes(self, array, axis1, axis2):
@@ -1401,9 +1397,9 @@ class ImageMatrix(Ndarray):
         """
         self.__imagedata = ImageData(imagedata)
         if isinstance(self.__imagedata.data, Uint8ClampedArray):
-            Ndarray.__init__(self, self.__imagedata.data, 0)
+            Ndarray.__init__(self, self.__imagedata.data, 'uint8c')
         else:     #ie10 supports typedarray, not uint8clampedarray
-            Ndarray.__init__(self, self.__imagedata.data, 1)
+            Ndarray.__init__(self, self.__imagedata.data, 'uint8')
         self.setshape(self.__imagedata.height,self.__imagedata.width,4)
 
     def getWidth(self):
