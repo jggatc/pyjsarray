@@ -58,42 +58,42 @@ class TypedArray(object):
         if data:
             if isinstance(data, int):
                 if pyjs_mode.optimized:
-                    self.__data = JS("""new @{{typedarray}}(@{{data}})""")
+                    self._data = JS("""new @{{typedarray}}(@{{data}})""")
                 else:
-                    self.__data = JS("""new @{{typedarray}}(@{{data}}['valueOf']())""")
+                    self._data = JS("""new @{{typedarray}}(@{{data}}['valueOf']())""")
             elif isinstance(data, (list,tuple)):
                 if pyjs_mode.optimized:
-                    self.__data = JS("""new @{{typedarray}}(@{{data}}['getArray']())""")
+                    self._data = JS("""new @{{typedarray}}(@{{data}}['getArray']())""")
                 else:
                     data = [dat.valueOf() for dat in data]
-                    self.__data = JS("""new @{{typedarray}}(@{{data}}['getArray']())""")
+                    self._data = JS("""new @{{typedarray}}(@{{data}}['getArray']())""")
             elif isinstance(data, TypedArray):
-                self.__data = JS("""new @{{typedarray}}(@{{data}}['__data'])""")
+                self._data = JS("""new @{{typedarray}}(@{{data}}['_data'])""")
             else:   #TypedArray or ArrayBuffer
                 if offset is None and length is None:
-                    self.__data = JS("""new @{{typedarray}}(@{{data}})""")
+                    self._data = JS("""new @{{typedarray}}(@{{data}})""")
                 else:
                     if offset is None:
                         offset = 0
                     if length is None:
-                        self.__data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}})""")
+                        self._data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}})""")
                     else:
-                        self.__data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}}, @{{length}})""")
+                        self._data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}}, @{{length}})""")
         else:
-            self.__data = None
+            self._data = None
 
     def __str__(self):
         """
         Return string representation of TypedArray object.
         """
-        return self.__data.toString()
+        return self._data.toString()
 
     def __iter__(self):
         """
         Iterate over TypedArray object.
         """
         index = 0
-        while index < self.__data.length:
+        while index < self._data.length:
             yield self[index]
             index += 1
 
@@ -101,24 +101,24 @@ class TypedArray(object):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{int}}(@{{self}}['__data'][@{{index}}]);""")
+        return JS("""@{{int}}(@{{self}}['_data'][@{{index}}]);""")
 
     def __setitem__(self, index, value):
         """
         Set TypedArray element by index.
         """
         if pyjs_mode.optimized:
-            JS("""@{{self}}['__data'][@{{index}}]=@{{value}};""")
+            JS("""@{{self}}['_data'][@{{index}}]=@{{value}};""")
         else:
             value = value.valueOf()
-            JS("""@{{self}}['__data'][@{{index}}]=@{{value}};""")
+            JS("""@{{self}}['_data'][@{{index}}]=@{{value}};""")
         return None
 
     def __len__(self):
         """
         Get TypedArray array length.
         """
-        return self.__data.length
+        return self._data.length
 
     def set(self, data, offset=0):
         """
@@ -126,65 +126,65 @@ class TypedArray(object):
         """
         if isinstance(data, (list,tuple)):
             if pyjs_mode.optimized:
-                self.__data.set(data.getArray(), offset)
+                self._data.set(data.getArray(), offset)
             else:
                 data = [dat.valueOf() for dat in data]
-                self.__data.set(data.getArray(), offset)
+                self._data.set(data.getArray(), offset)
         elif isinstance(data, TypedArray):
-            self.__data.set(data.__data, offset)
+            self._data.set(data._data, offset)
 
     def subarray(self, begin=0, end=None):
         """
         Retrieve a subarray of the array. The subarray is a is a view of the derived array. Optional arguments begin and end (default to begin/end of the array) are the index spanning the subarray.
         """
         if end is None:
-            end = self.__data.length
-        array = self.__data.subarray(begin, end)
+            end = self._data.length
+        array = self._data.subarray(begin, end)
         typedarray = self.__class__()
-        typedarray.__data = array
+        typedarray._data = array
         return typedarray
 
     def getLength(self):
         """
         Return array.length attribute.
         """
-        return self.__data.length
+        return self._data.length
 
     def getByteLength(self):
         """
         Return array.byteLength attribute.
         """
-        return self.__data.byteLength
+        return self._data.byteLength
 
     def getBuffer(self):
         """
         Return array.buffer attribute.
         """
-        return self.__data.buffer
+        return self._data.buffer
 
     def getByteOffset(self):
         """
         Return array.byteOffset attribute.
         """
-        return self.__data.byteOffset
+        return self._data.byteOffset
 
     def getBytesPerElement(self):
         """
         Return array.BYTES_PER_ELEMENT attribute.
         """
-        return self.__data.BYTES_PER_ELEMENT
+        return self._data.BYTES_PER_ELEMENT
 
     def getArray(self):
         """
         Return JavaScript TypedArray.
         """
-        return self.__data
+        return self._data
 
     def setArray(self, array):
         """
         Set JavaScript TypedArray.
         """
-        self.__data = array
+        self._data = array
         return None
 
 
@@ -319,7 +319,7 @@ class Float32Array(TypedArray):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{self}}['__data'][@{{index}}];""")
+        return JS("""@{{self}}['_data'][@{{index}}];""")
 
 
 class Float64Array(TypedArray):
@@ -341,7 +341,7 @@ class Float64Array(TypedArray):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{self}}['__data'][@{{index}}];""")
+        return JS("""@{{self}}['_data'][@{{index}}];""")
 
 
 class CanvasPixelArray(TypedArray):
@@ -400,9 +400,9 @@ class CanvasPixelArray(TypedArray):
         Retrieve a subarray of the array. The subarray is a is a view of the derived array. Optional arguments begin and end (default to begin/end of the array) are the index spanning the subarray.
         """
         if end is None:
-            end = self.__data.length
+            end = self._data.length
         array = self.__class__()
-        array.__data = self.__data
+        array._data = self._data
         array._superArray = self
         array._superIndex = (begin,end)
         return array
@@ -451,7 +451,7 @@ class Ndarray(object):
             size = 1
             for i in dim:
                 size *= i
-            self.__data = typedarray(size)
+            self._data = typedarray(size)
             self._shape = dim
             indices = []
             for i in self._shape:
@@ -459,22 +459,22 @@ class Ndarray(object):
                 indices.append(size)
             self._indices = tuple(indices)
         elif isinstance(dim, int):
-            self.__data = typedarray(dim)
+            self._data = typedarray(dim)
             self._shape = (dim,)
             self._indices = (self._shape[0],)
         elif isinstance(dim, list):
             if not (len(dim)>0 and isinstance(dim[0], list)):
-                self.__data = typedarray(dim)
+                self._data = typedarray(dim)
                 self._shape = (len(dim),)
                 self._indices = (self._shape[0],)
             else:
                 _dat = self._lflatten(dim)
                 _dim = self._lshape(dim)
-                self.__data = typedarray(list(_dat))
-                self._shape = (len(self.__data),)
+                self._data = typedarray(list(_dat))
+                self._shape = (len(self._data),)
                 self.setshape(tuple(_dim))
         else:
-            self.__data = dim
+            self._data = dim
             self._shape = (len(dim),)
             self._indices = (self._shape[0],)
 
@@ -515,22 +515,22 @@ class Ndarray(object):
         if hasattr(index, '__len__'):
             indexLn, shapeLn = index.__len__(), len(self._shape)
             if indexLn == shapeLn:
-                return self.__data[sum([index[i]*self._indices[i] for i in range(indexLn)])]
+                return self._data[sum([index[i]*self._indices[i] for i in range(indexLn)])]
             else:
                 begin = sum([index[i]*self._indices[i] for i in range(indexLn)])
                 end = begin + self._indices[indexLn-1]
-                subarray = self.__data.subarray(begin, end)
+                subarray = self._data.subarray(begin, end)
                 array = Ndarray(subarray, self._dtype)
                 array._shape = self._shape[indexLn:]
                 array._indices = self._indices[indexLn:]
                 return array
         else:
             if len(self._shape) == 1:
-                return self.__data[index]
+                return self._data[index]
             else:
                 begin = index * self._indices[0]
                 end = begin + self._indices[0]
-                subarray = self.__data.subarray(begin, end)
+                subarray = self._data.subarray(begin, end)
                 array = Ndarray(subarray, self._dtype)
                 array._shape = self._shape[1:]
                 array._indices = self._indices[1:]
@@ -549,26 +549,26 @@ class Ndarray(object):
         if hasattr(index, '__len__'):
             indexLn, shapeLn = index.__len__(), len(self._shape)
             if indexLn == shapeLn:
-                self.__data[sum([index[i]*self._indices[i] for i in range(indexLn)])] = value
+                self._data[sum([index[i]*self._indices[i] for i in range(indexLn)])] = value
             else:
                 begin = sum([index[i]*self._indices[i] for i in range(indexLn)])
                 end = begin + self._indices[indexLn-1]
-                subarray = self.__data.subarray(begin, end)
+                subarray = self._data.subarray(begin, end)
                 if isinstance(value, Ndarray):
-                    value = value.__data
+                    value = value._data
                 else:
                     if isinstance(value[0], (list,tuple)):
                         value = unpack(value)
                 subarray.set(value)
         else:
             if len(self._shape) == 1:
-                self.__data[index] = value
+                self._data[index] = value
             else:
                 begin = index * self._indices[0]
                 end = begin + self._indices[0]
-                subarray = self.__data.subarray(begin, end)
+                subarray = self._data.subarray(begin, end)
                 if isinstance(value, Ndarray):
-                    value = value.__data
+                    value = value._data
                 else:
                     if isinstance(value[0], (list,tuple)):
                         value = unpack(value)
@@ -576,11 +576,11 @@ class Ndarray(object):
         return None
 
     def __getslice__(self, lower, upper):
-        subarray = self.__data.subarray(lower, upper)
+        subarray = self._data.subarray(lower, upper)
         return Ndarray(subarray, self._dtype)
 
     def __setslice__(self, lower, upper, data):
-        subarray = self.__data.subarray(lower, upper)
+        subarray = self._data.subarray(lower, upper)
         subarray.set(data)
         return None
 
@@ -590,7 +590,7 @@ class Ndarray(object):
             while index < self._shape[0]:
                 begin = index * self._indices[0]
                 end = begin + self._indices[0]
-                subarray = self.__data.subarray(begin, end)
+                subarray = self._data.subarray(begin, end)
                 array = Ndarray(subarray, self._dtype)
                 array._shape = self._shape[1:]
                 array._indices = self._indices[1:]
@@ -599,17 +599,17 @@ class Ndarray(object):
         else:
             index = 0
             while index < self._shape[0]:
-                yield self.__data[index]
+                yield self._data[index]
                 index += 1
 
     def _array_dim(self):
         if 'int' in self._dtype:
-            vmax = len(str(max(self.__data)))
-            vmin = len(str(min(self.__data)))
+            vmax = len(str(max(self._data)))
+            vmin = len(str(min(self._data)))
             vlen = {True:vmax, False:vmin}[vmax>vmin]
             vfmt = '%*d'
         else:
-            vlen = max([len('%0.4f'%v) for v in self.__data])
+            vlen = max([len('%0.4f'%v) for v in self._data])
             vfmt = '%*.4f'
         return vlen, vfmt
 
@@ -651,11 +651,11 @@ class Ndarray(object):
         return self._shape[0]
 
     def __lt__(self, other):
-        ndarray = Ndarray(len(self.__data), 'uint8')
+        ndarray = Ndarray(len(self._data), 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] < other
@@ -669,8 +669,8 @@ class Ndarray(object):
         ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] <= other
@@ -684,8 +684,8 @@ class Ndarray(object):
         ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] == other
@@ -699,8 +699,8 @@ class Ndarray(object):
         ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] != other
@@ -714,8 +714,8 @@ class Ndarray(object):
         ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] > other
@@ -729,8 +729,8 @@ class Ndarray(object):
         ndarray = Ndarray(self._shape, 'uint8')
         ndarray._shape = self._shape
         ndarray._indices = self._indices
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] >= other
@@ -742,8 +742,8 @@ class Ndarray(object):
 
     def __add__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] + other
@@ -755,8 +755,8 @@ class Ndarray(object):
 
     def __sub__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] - other
@@ -768,8 +768,8 @@ class Ndarray(object):
 
     def __mul__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] * other
@@ -784,8 +784,8 @@ class Ndarray(object):
 
     def __truediv__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] / other
@@ -797,8 +797,8 @@ class Ndarray(object):
 
     def __floordiv__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] // other
@@ -813,8 +813,8 @@ class Ndarray(object):
 
     def __mod__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] % other
@@ -826,8 +826,8 @@ class Ndarray(object):
 
     def __pow__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] ** other
@@ -839,8 +839,8 @@ class Ndarray(object):
 
     def __neg__(self):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         for i in range(len(data)):
             ndarray_data[i] = -data[i]
         return ndarray
@@ -851,8 +851,8 @@ class Ndarray(object):
 
     def __abs__(self):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         for i in range(len(data)):
             if data[i] < 0:
                 ndarray_data[i] = -data[i]
@@ -866,8 +866,8 @@ class Ndarray(object):
             raise ValueError('incompatible array shapes for matmul')
         if x_dim == 1:
             if self._shape[0] == _other._shape[0]:
-                data = self.__data
-                other_data = _other.__data
+                data = self._data
+                other_data = _other._data
                 result = 0
                 for i in range(len(data)):
                     result += (data[i] * other_data[i])
@@ -886,7 +886,7 @@ class Ndarray(object):
                 d_len*=v
         else:
             raise ValueError('incompatible array shapes for matmul')
-        _data = self.__data.__class__(d_len*n*p)
+        _data = self._data.__class__(d_len*n*p)
         array = Ndarray(_data, self._dtype)
         array.setshape(d+(n,p))
         if x_dim == 2:
@@ -903,9 +903,9 @@ class Ndarray(object):
         else:
             raise ValueError('incompatible array shapes for matmul')
         for _x, _y, _array in arrays:
-            _x_data = _x.__data
-            _y_data = _y.__data
-            _array_data = _array.__data
+            _x_data = _x._data
+            _y_data = _y._data
+            _array_data = _array._data
             for i in range(n):
                 for j in range(p):
                     result = 0
@@ -915,7 +915,7 @@ class Ndarray(object):
         return array
 
     def __iadd__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] += other
@@ -926,7 +926,7 @@ class Ndarray(object):
         return self
 
     def __isub__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] -= other
@@ -937,7 +937,7 @@ class Ndarray(object):
         return self
 
     def __imul__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] *= other
@@ -951,7 +951,7 @@ class Ndarray(object):
         return self.__itruediv__(other)
 
     def __itruediv__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] /= other
@@ -962,7 +962,7 @@ class Ndarray(object):
         return self
 
     def __ifloordiv__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] //= other
@@ -973,7 +973,7 @@ class Ndarray(object):
         return self
 
     def __imod__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] %= other
@@ -984,7 +984,7 @@ class Ndarray(object):
         return self
 
     def __ipow__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] **= other
@@ -996,8 +996,8 @@ class Ndarray(object):
 
     def __lshift__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] << other
@@ -1009,8 +1009,8 @@ class Ndarray(object):
 
     def __rshift__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] >> other
@@ -1022,8 +1022,8 @@ class Ndarray(object):
 
     def __and__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] & other
@@ -1035,8 +1035,8 @@ class Ndarray(object):
 
     def __or__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] | other
@@ -1048,8 +1048,8 @@ class Ndarray(object):
 
     def __xor__(self, other):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 ndarray_data[i] = data[i] ^ other
@@ -1060,7 +1060,7 @@ class Ndarray(object):
         return ndarray
 
     def __ilshift__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] = data[i] << other
@@ -1071,7 +1071,7 @@ class Ndarray(object):
         return self
 
     def __irshift__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] = data[i] >> other
@@ -1082,7 +1082,7 @@ class Ndarray(object):
         return self
 
     def __iand__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] = data[i] & other
@@ -1093,7 +1093,7 @@ class Ndarray(object):
         return self
 
     def __ior__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] = data[i] | other
@@ -1104,7 +1104,7 @@ class Ndarray(object):
         return self
 
     def __ixor__(self, other):
-        data = self.__data
+        data = self._data
         if not hasattr(other, '__iter__'):
             for i in range(len(data)):
                 data[i] = data[i] ^ other
@@ -1116,8 +1116,8 @@ class Ndarray(object):
 
     def __invert__(self):
         ndarray = self.empty()
-        ndarray_data = ndarray.__data
-        data = self.__data
+        ndarray_data = ndarray._data
+        data = self._data
         for i in range(len(data)):
             ndarray_data[i] = ~data[i]
         return ndarray
@@ -1130,7 +1130,7 @@ class Ndarray(object):
                 other = Ndarray(list(other), self._dtype)
         if self._shape != other._shape:
             raise TypeError("array shapes are not compatible")
-        return other.__data
+        return other._data
 
     def _get_array(self, other):
         if not isinstance(other, Ndarray):
@@ -1205,7 +1205,7 @@ class Ndarray(object):
             array_size *= i
         if size != array_size:
             raise TypeError("array size cannot change")
-        subarray = self.__data.subarray(0)
+        subarray = self._data.subarray(0)
         array = Ndarray(subarray)
         array._shape = dim
         indices = []
@@ -1236,19 +1236,19 @@ class Ndarray(object):
             dataLn = data.length
         else:
             if pyjs_mode.optimized:
-                for index in range(self.__data.__data.length):
-                    JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}};""")
+                for index in range(self._data._data.length):
+                    JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}};""")
             else:
                 data = data.valueOf()
-                for index in range(self.__data.__data.length):
-                    JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}};""")
+                for index in range(self._data._data.length):
+                    JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}};""")
             return None
-        if dataLn == self.__data.__data.length:
-            for index in range(self.__data.__data.length):
-                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}}[@{{index}}];""")
+        if dataLn == self._data._data.length:
+            for index in range(self._data._data.length):
+                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}}[@{{index}}];""")
         else:
-            for index in range(self.__data.__data.length):
-                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{data}}[@{{index}}%@{{dataLn}}];""")
+            for index in range(self._data._data.length):
+                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}}[@{{index}}%@{{dataLn}}];""")
         return None
 
     def fill(self, value):
@@ -1256,19 +1256,19 @@ class Ndarray(object):
         Set array elements to value argument.
         """
         if pyjs_mode.optimized:
-            for index in range(self.__data.__data.length):
-                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{value}};""")
+            for index in range(self._data._data.length):
+                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{value}};""")
         else:
             value = value.valueOf()
-            for index in range(self.__data.__data.length):
-                JS("""@{{self}}['__data']['__data'][@{{index}}]=@{{value}};""")
+            for index in range(self._data._data.length):
+                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{value}};""")
         return None
 
     def copy(self):
         """
         Return copy of array.
         """
-        array = self.__data.__class__(self.__data)
+        array = self._data.__class__(self._data)
         ndarray = Ndarray(array, self._dtype)
         ndarray._shape = self._shape
         ndarray._indices = self._indices
@@ -1278,7 +1278,7 @@ class Ndarray(object):
         """
         Return empty copy of array.
         """
-        ndarray = Ndarray(len(self.__data), self._dtype)
+        ndarray = Ndarray(len(self._data), self._dtype)
         ndarray._shape = self._shape
         ndarray._indices = self._indices
         return ndarray
@@ -1289,7 +1289,7 @@ class Ndarray(object):
         Argument dtype is TypedArray data type.
         """
         typedarray = self.__typedarray[self.__dtypes[dtype]]
-        array = typedarray(self.__data)
+        array = typedarray(self._data)
         ndarray = Ndarray(array, dtype)
         ndarray._shape = self._shape
         ndarray._indices = self._indices
@@ -1299,7 +1299,7 @@ class Ndarray(object):
         """
         Return view of array.
         """
-        subarray = self.__data.subarray(0)
+        subarray = self._data.subarray(0)
         array = Ndarray(subarray)
         array._shape = self._shape
         array._indices = self._indices
@@ -1311,7 +1311,7 @@ class Ndarray(object):
         Arguments are the axis to swap.
         Return view of array with axes changed.
         """
-        array = Ndarray(self.__data, self._dtype)
+        array = Ndarray(self._data, self._dtype)
         shape = list(self._shape)
         shape[axis1], shape[axis2] = shape[axis2], shape[axis1]
         array._shape = tuple(shape)
@@ -1343,7 +1343,7 @@ class Ndarray(object):
         """
         Return JavaScript TypedArray.
         """
-        return self.__data.getArray()
+        return self._data.getArray()
 
 
 class NP(object):
@@ -1358,8 +1358,8 @@ class NP(object):
         if isinstance(values[0], (list,tuple,TypedArray)):
             values = [value for dat in values for value in dat]
         newarray = Ndarray(len(array)+len(values), array._dtype)
-        newarray.__data.set(array.__data)
-        newarray.__data.set(values, len(array))
+        newarray._data.set(array._data)
+        newarray._data.set(values, len(array))
         return newarray
 
 np = NP()
@@ -1372,12 +1372,12 @@ class ImageData(object):
         Provides an interface to canvas ImageData.
         The argument required is the ImageData instance to be accessed.
         """
-        self.__imagedata = imagedata
+        self._imagedata = imagedata
         if not isUndefined(TypedArray.__obj['Uint8ClampedArray']):
             self.data = Uint8ClampedArray()
         else:
             self.data = CanvasPixelArray()
-        self.data.__data = imagedata.data
+        self.data._data = imagedata.data
         self.width = imagedata.width
         self.height = imagedata.height
 
@@ -1385,7 +1385,7 @@ class ImageData(object):
         """
         Return JavaScript ImageData instance.
         """
-        return self.__imagedata
+        return self._imagedata
 
 
 class ImageMatrix(Ndarray):
@@ -1395,24 +1395,24 @@ class ImageMatrix(Ndarray):
         Provides an interface to canvas ImageData as an Ndarray array.
         The argument required is the ImageData instance to be accessed.
         """
-        self.__imagedata = ImageData(imagedata)
-        if isinstance(self.__imagedata.data, Uint8ClampedArray):
-            Ndarray.__init__(self, self.__imagedata.data, 'uint8c')
+        self._imagedata = ImageData(imagedata)
+        if isinstance(self._imagedata.data, Uint8ClampedArray):
+            Ndarray.__init__(self, self._imagedata.data, 'uint8c')
         else:     #ie10 supports typedarray, not uint8clampedarray
-            Ndarray.__init__(self, self.__imagedata.data, 'uint8')
-        self.setshape(self.__imagedata.height,self.__imagedata.width,4)
+            Ndarray.__init__(self, self._imagedata.data, 'uint8')
+        self.setshape(self._imagedata.height,self._imagedata.width,4)
 
     def getWidth(self):
         """
         Return ImageData width.
         """
-        return self.__imagedata.width
+        return self._imagedata.width
 
     def getHeight(self):
         """
         Return ImageData height.
         """
-        return self.__imagedata.height
+        return self._imagedata.height
 
     def getPixel(self, index):
         """
@@ -1420,7 +1420,7 @@ class ImageMatrix(Ndarray):
         The index arguement references the 2D array element.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        return (self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3])
+        return (self._imagedata.data[i], self._imagedata.data[i+1], self._imagedata.data[i+2], self._imagedata.data[i+3])
 
     def setPixel(self, index, value):
         """
@@ -1428,7 +1428,7 @@ class ImageMatrix(Ndarray):
         The arguements index references the 2D array element and value is pixel RGBA.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3] = value[0], value[1], value[2], value[3]
+        self._imagedata.data[i], self._imagedata.data[i+1], self._imagedata.data[i+2], self._imagedata.data[i+3] = value[0], value[1], value[2], value[3]
         return None
 
     def getPixelRGB(self, index):
@@ -1437,7 +1437,7 @@ class ImageMatrix(Ndarray):
         The index arguement references the 2D array element.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        return (self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2])
+        return (self._imagedata.data[i], self._imagedata.data[i+1], self._imagedata.data[i+2])
 
     def setPixelRGB(self, index, value):
         """
@@ -1445,7 +1445,7 @@ class ImageMatrix(Ndarray):
         The arguements index references the 2D array element and value is pixel RGB.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2] = value[0], value[1], value[2]
+        self._imagedata.data[i], self._imagedata.data[i+1], self._imagedata.data[i+2] = value[0], value[1], value[2]
         return None
 
     def getPixelAlpha(self, index):
@@ -1454,7 +1454,7 @@ class ImageMatrix(Ndarray):
         The index arguement references the 2D array element.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        return self.__imagedata.data[i+3]
+        return self._imagedata.data[i+3]
 
     def setPixelAlpha(self, index, value):
         """
@@ -1462,7 +1462,7 @@ class ImageMatrix(Ndarray):
         The arguements index references the 2D array element and value is pixel alpha.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        self.__imagedata.data[i+3] = value
+        self._imagedata.data[i+3] = value
         return None
 
     def getPixelInteger(self, index):
@@ -1471,7 +1471,7 @@ class ImageMatrix(Ndarray):
         The index arguement references the 2D array element.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        return self.__imagedata.data[i]<<16 | self.__imagedata.data[i+1]<<8 | self.__imagedata.data[i+2] | self.imagedata.data[i+3]<<24
+        return self._imagedata.data[i]<<16 | self._imagedata.data[i+1]<<8 | self._imagedata.data[i+2] | self.imagedata.data[i+3]<<24
 
     def setPixelInteger(self, index, value):
         """
@@ -1479,14 +1479,14 @@ class ImageMatrix(Ndarray):
         The arguements index references the 2D array element and value is pixel color.
         """
         i = (index[0]*self._indices[0]) + (index[1]*4)
-        self.__imagedata.data[i], self.__imagedata.data[i+1], self.__imagedata.data[i+2], self.__imagedata.data[i+3] = value>>16 & 0xff, value>>8 & 0xff, value & 0xff, value>>24 & 0xff
+        self._imagedata.data[i], self._imagedata.data[i+1], self._imagedata.data[i+2], self._imagedata.data[i+3] = value>>16 & 0xff, value>>8 & 0xff, value & 0xff, value>>24 & 0xff
         return None
 
     def getImageData(self):
         """
         Return JavaScript ImageData instance.
         """
-        return self.__imagedata.getImageData()
+        return self._imagedata.getImageData()
 
 
 class BitSet(object):
@@ -1495,19 +1495,19 @@ class BitSet(object):
     BitSet provides a bitset object to use in a Python-to-JavaScript application. The object stores data in a JavaScript Uint8Array 8-bit typedarray. BitSet16 and BitSet32 stores data in Uint16Array (16-bit) and Uint32Array (32-bit) typedarray. The BitSet will dynamically expand to hold the bits required, an optional width argument define number of bits the BitSet instance will initially hold.
     """
 
-    __bit = 8
-    __bitmask = None
+    _bit = 8
+    _bitmask = None
     __typedarray = Uint8Array
 
     def __init__(self, width=None):
-        if not self.__class__.__bitmask:
-            self.__class__.__bitmask = dict([(self.__class__.__bit-i-1,1<<i) for i in range(self.__class__.__bit-1,-1,-1)])
-            self.__class__.__bitmask[self.__class__.__bit-1] = int(self.__class__.__bitmask[self.__class__.__bit-1])      #pyjs [1<<0] = 1L
+        if not self.__class__._bitmask:
+            self.__class__._bitmask = dict([(self.__class__._bit-i-1,1<<i) for i in range(self.__class__._bit-1,-1,-1)])
+            self.__class__._bitmask[self.__class__._bit-1] = int(self.__class__._bitmask[self.__class__._bit-1])      #pyjs [1<<0] = 1L
         if width:
-            self.__width = abs(width)
+            self._width = abs(width)
         else:
-            self.__width = self.__bit
-        self.__data = self.__typedarray( _ceil(self.__width/(self.__bit*1.0)) )
+            self._width = self._bit
+        self._data = self.__typedarray( _ceil(self._width/(self._bit*1.0)) )
 
     def __str__(self):
         """
@@ -1520,7 +1520,7 @@ class BitSet(object):
         Return string of the indexes of the set bits.
         """
         setBit = []
-        for index in range(self.__width):
+        for index in range(self._width):
             if self.get(index):
                 setBit.append(str(index))
         return "{" + ", ".join(setBit) + "}"
@@ -1541,7 +1541,7 @@ class BitSet(object):
         """
         Get bit length.
         """
-        for index in range(self.__width-1, -1, -1):
+        for index in range(self._width-1, -1, -1):
             if self.get(index):
                 break
         return index+1
@@ -1551,7 +1551,7 @@ class BitSet(object):
         Iterate over bits.
         """
         index = 0
-        while index < self.__width:
+        while index < self._width:
             yield self.get(index)
             index += 1
 
@@ -1560,7 +1560,7 @@ class BitSet(object):
         Get bit by index.
         Arguments include index of bit, and optional toIndex that return a slice as a BitSet.
         """
-        if index > self.__width-1:
+        if index > self._width-1:
             if not toIndex:
                 return False
             else:
@@ -1570,16 +1570,16 @@ class BitSet(object):
                 else:
                     return None
         if toIndex is None:
-            return bool( self.__data[ int(index/self.__bit) ] & self.__bitmask[ index%self.__bit ] )
+            return bool( self._data[ int(index/self._bit) ] & self._bitmask[ index%self._bit ] )
         else:
             size = toIndex-index
             if size > 0:
                 bitset = self.__class__(size)
                 ix = 0
-                if toIndex > self.__width:
-                    toIndex = self.__width
+                if toIndex > self._width:
+                    toIndex = self._width
                 for i in range(index, toIndex):
-                    bitset.set(ix, bool( self.__data[ int(i/self.__bit) ] & self.__bitmask[ i%self.__bit ] ))
+                    bitset.set(ix, bool( self._data[ int(i/self._bit) ] & self._bitmask[ i%self._bit ] ))
                     ix += 1
                 return bitset
             else:
@@ -1590,17 +1590,17 @@ class BitSet(object):
         Set bit by index.
         Optional argument value is the bit state of 1(True) or 0(False). Default:1
         """
-        if index > self.__width-1:
+        if index > self._width-1:
             if value:
                 self.resize(index+1)
             else:
                 return
         if value:
-            self.__data[ int(index/self.__bit) ] = self.__data[ int(index/self.__bit) ] | self.__bitmask[ index%self.__bit ]
-#            self.__data[ int(index/self.__bit) ] |= self.__bitmask[ index%self.__bit ]    #pyjs -O: |= not processed
+            self._data[ int(index/self._bit) ] = self._data[ int(index/self._bit) ] | self._bitmask[ index%self._bit ]
+#            self._data[ int(index/self._bit) ] |= self._bitmask[ index%self._bit ]    #pyjs -O: |= not processed
         else:
-            self.__data[ int(index/self.__bit) ] = self.__data[ int(index/self.__bit) ] & ~(self.__bitmask[ index%self.__bit ])
-#            self.__data[ int(index/self.__bit) ] &= ~(self.__bitmask[ index%self.__bit ])     #pyjs -O: &= not processed
+            self._data[ int(index/self._bit) ] = self._data[ int(index/self._bit) ] & ~(self._bitmask[ index%self._bit ])
+#            self._data[ int(index/self._bit) ] &= ~(self._bitmask[ index%self._bit ])     #pyjs -O: &= not processed
         return None
 
     def fill(self, index=None, toIndex=None):
@@ -1609,7 +1609,7 @@ class BitSet(object):
         Optional argument index is bit index to set, and toIndex to set a range of bits.
         """
         if index is None and toIndex is None:
-            for i in range(0, self.__width):
+            for i in range(0, self._width):
                 self.set(i, 1)
         else:
             if toIndex is None:
@@ -1624,15 +1624,15 @@ class BitSet(object):
         Optional argument index is bit index to clear, and toIndex to clear a range of bits.
         """
         if index is None:
-            for i in range(len(self.__data)):
-                self.__data[i] = 0
+            for i in range(len(self._data)):
+                self._data[i] = 0
         else:
             if toIndex is None:
                 self.set(index, 0)
             else:
-                if index == 0 and toIndex == self.__width:
-                    for dat in range(len(self.__data)):
-                        self.__data[dat] = 0
+                if index == 0 and toIndex == self._width:
+                    for dat in range(len(self._data)):
+                        self._data[dat] = 0
                 else:
                     for i in range(index, toIndex):
                         self.set(i, 0)
@@ -1645,12 +1645,12 @@ class BitSet(object):
         if toIndex is None:
             self.set(index, not self.get(index))
         else:
-            if toIndex > self.__width:
+            if toIndex > self._width:
                 self.resize(toIndex)
-                toIndex = self.__width
-            if index == 0 and toIndex == self.__width:
-                for dat in range(len(self.__data)):
-                    self.__data[dat] = ~self.__data[dat]
+                toIndex = self._width
+            if index == 0 and toIndex == self._width:
+                for dat in range(len(self._data)):
+                    self._data[dat] = ~self._data[dat]
             else:
                 for i in range(index, toIndex):
                     self.set(i, not self.get(i))
@@ -1660,7 +1660,7 @@ class BitSet(object):
         Return the count of bit set.
         """
         count = 0
-        for bit in range(self.__width):
+        for bit in range(self._width):
             if self.get(bit):
                 count += 1
         return count
@@ -1670,8 +1670,8 @@ class BitSet(object):
         Check if set bits in this BitSet are also set in the bitset argument.
         Return True if bitsets intersect, otherwise return False.
         """
-        for dat in range(len(bitset.__data)):
-            if bitset.__data[dat] & self.__data[dat]:
+        for dat in range(len(bitset._data)):
+            if bitset._data[dat] & self._data[dat]:
                 return True
         return False
 
@@ -1679,61 +1679,61 @@ class BitSet(object):
         """
         BitSet and BitSet.
         """
-        data = min(len(self.__data), len(bitset.__data))
+        data = min(len(self._data), len(bitset._data))
         for dat in range(data):
-            self.__data[dat] = self.__data[dat] & bitset.__data[dat]
-#            self.__data[dat] &= bitset.__data[dat]     #pyjs -O: &= not processed
+            self._data[dat] = self._data[dat] & bitset._data[dat]
+#            self._data[dat] &= bitset._data[dat]     #pyjs -O: &= not processed
 #        pyjs -S: &= calls __and__ instead of __iand__, -O: no call to operator methods
 
     def orSet(self, bitset):
         """
         BitSet or BitSet.
         """
-        data = min(len(self.__data), len(bitset.__data))
+        data = min(len(self._data), len(bitset._data))
         for dat in range(data):
-            self.__data[dat] = self.__data[dat] | bitset.__data[dat]
-#            self.__data[dat] |= bitset.__data[dat]    #pyjs -O: |= not processed
+            self._data[dat] = self._data[dat] | bitset._data[dat]
+#            self._data[dat] |= bitset._data[dat]    #pyjs -O: |= not processed
 
     def xorSet(self, bitset):
         """
         BitSet xor BitSet.
         """
-        data = min(len(self.__data), len(bitset.__data))
+        data = min(len(self._data), len(bitset._data))
         for dat in range(data):
-            self.__data[dat] = self.__data[dat] ^ bitset.__data[dat]
-#            self.__data[dat] ^= bitset.__data[dat]    #pyjs -O: |= not processed
+            self._data[dat] = self._data[dat] ^ bitset._data[dat]
+#            self._data[dat] ^= bitset._data[dat]    #pyjs -O: |= not processed
 
     def resize(self, width):
         """
         Resize the BitSet to width argument.
         """
-        if width > self.__width:
-            self.__width = width
-            if self.__width > len(self.__data) * self.__bit:
-                array = self.__typedarray( _ceil(self.__width/(self.__bit*1.0)) )
-                array.set(self.__data)
-                self.__data = array
-        elif width < self.__width:
+        if width > self._width:
+            self._width = width
+            if self._width > len(self._data) * self._bit:
+                array = self.__typedarray( _ceil(self._width/(self._bit*1.0)) )
+                array.set(self._data)
+                self._data = array
+        elif width < self._width:
             if width < len(self):
                 width = len(self)
-            self.__width = width
-            if self.__width <= len(self.__data) * self.__bit - self.__bit:
-                array = self.__typedarray( _ceil(self.__width/(self.__bit*1.0)) )
-                array.set(self.__data.subarray(0,_ceil(self.__width/(self.__bit*1.0))))
-                self.__data = array
+            self._width = width
+            if self._width <= len(self._data) * self._bit - self._bit:
+                array = self.__typedarray( _ceil(self._width/(self._bit*1.0)) )
+                array.set(self._data.subarray(0,_ceil(self._width/(self._bit*1.0))))
+                self._data = array
 
     def size(self):
         """
         Return bits used by BitSet storage array.
         """
-        return len(self.__data) * self.__bit
+        return len(self._data) * self._bit
 
     def isEmpty(self):
         """
         Check whether any bit is set.
         Return True if none set, otherwise return False.
         """
-        for data in self.__data:
+        for data in self._data:
             if data:
                 return False
         return True
@@ -1743,9 +1743,9 @@ class BitSet(object):
         Return a copy of the BitSet.
         """
         new_bitset = self.__class__(1)
-        data = self.__typedarray(self.__data)
-        new_bitset.__data = data
-        new_bitset.__width = self.__width
+        data = self.__typedarray(self._data)
+        new_bitset._data = data
+        new_bitset._width = self._width
         return new_bitset
 
 
@@ -1753,8 +1753,8 @@ class BitSet16(BitSet):
     """
     BitSet using Uint16Array typedarray.
     """
-    __bit = 16
-    __bitmask = None
+    _bit = 16
+    _bitmask = None
     __typedarray = Uint16Array
 
     def __init__(self, width=None):
@@ -1765,8 +1765,8 @@ class BitSet32(BitSet):
     """
     BitSet using Uint32Array typedarray.
     """
-    __bit = 32
-    __bitmask = None
+    _bit = 32
+    _bitmask = None
     __typedarray = Uint32Array
 
     def __init__(self, width=None):
