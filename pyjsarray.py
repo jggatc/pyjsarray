@@ -82,6 +82,16 @@ class TypedArray(object):
         else:
             self._data = None
 
+    filter = lambda self,func: self._array(self._data.filter(func))
+    map = lambda self,func: self._array(self._data.map(func))
+    reduce = lambda self,acc: self._array(self._data.reduce(acc))
+    slice = lambda self,i,j: self._array(self._data.slice(i,j))
+ 
+    def _array(self, array):
+        typedarray = self.__class__()
+        typedarray._data = array
+        return typedarray
+
     def __str__(self):
         """
         Return string representation of TypedArray object.
