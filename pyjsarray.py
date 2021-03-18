@@ -1510,9 +1510,9 @@ class BitSet(object):
     __typedarray = Uint8Array
 
     def __init__(self, width=None):
-        if not self.__class__._bitmask:
-            self.__class__._bitmask = dict([(self.__class__._bit-i-1,1<<i) for i in range(self.__class__._bit-1,-1,-1)])
-            self.__class__._bitmask[self.__class__._bit-1] = int(self.__class__._bitmask[self.__class__._bit-1])      #pyjs [1<<0] = 1L
+        if not self._bitmask:
+            self._bitmask = dict([(self._bit-i-1,1<<i) for i in range(self._bit-1,-1,-1)])
+            self._bitmask[self._bit-1] = int(self._bitmask[self._bit-1])      #pyjs [1<<0] = 1L
         if width:
             self._width = abs(width)
         else:
