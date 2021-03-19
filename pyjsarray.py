@@ -1523,7 +1523,13 @@ class BitSet(object):
         """
         Return string representation of BitSet object.
         """
-        return "%s" % self.__class__
+        v = {True:'1', False:'0'}
+        s = []
+        for i in range(self.size()):
+            s.append(v[self.get(i)])
+            if not (i+1)%64:
+                s.append('\n')
+        return ''.join(s)
 
     def __repr__(self):
         """
