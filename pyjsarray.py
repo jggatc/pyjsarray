@@ -58,27 +58,27 @@ class TypedArray(object):
         if data:
             if isinstance(data, int):
                 if pyjs_mode.optimized:
-                    self._data = JS("""new @{{typedarray}}(@{{data}})""")
+                    self._data = JS("new @{{typedarray}}(@{{data}})")
                 else:
-                    self._data = JS("""new @{{typedarray}}(@{{data}}['valueOf']())""")
+                    self._data = JS("new @{{typedarray}}(@{{data}}['valueOf']())")
             elif isinstance(data, (list,tuple)):
                 if pyjs_mode.optimized:
-                    self._data = JS("""new @{{typedarray}}(@{{data}}['getArray']())""")
+                    self._data = JS("new @{{typedarray}}(@{{data}}['getArray']())")
                 else:
                     data = [dat.valueOf() for dat in data]
-                    self._data = JS("""new @{{typedarray}}(@{{data}}['getArray']())""")
+                    self._data = JS("new @{{typedarray}}(@{{data}}['getArray']())")
             elif isinstance(data, TypedArray):
-                self._data = JS("""new @{{typedarray}}(@{{data}}['_data'])""")
+                self._data = JS("new @{{typedarray}}(@{{data}}['_data'])")
             else:   #TypedArray or ArrayBuffer
                 if offset is None and length is None:
-                    self._data = JS("""new @{{typedarray}}(@{{data}})""")
+                    self._data = JS("new @{{typedarray}}(@{{data}})")
                 else:
                     if offset is None:
                         offset = 0
                     if length is None:
-                        self._data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}})""")
+                        self._data = JS("new @{{typedarray}}(@{{data}}, @{{offset}})")
                     else:
-                        self._data = JS("""new @{{typedarray}}(@{{data}}, @{{offset}}, @{{length}})""")
+                        self._data = JS("new @{{typedarray}}(@{{data}}, @{{offset}}, @{{length}})")
         else:
             self._data = None
 
@@ -111,17 +111,17 @@ class TypedArray(object):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{int}}(@{{self}}['_data'][@{{index}}]);""")
+        return JS("@{{int}}(@{{self}}['_data'][@{{index}}]);")
 
     def __setitem__(self, index, value):
         """
         Set TypedArray element by index.
         """
         if pyjs_mode.optimized:
-            JS("""@{{self}}['_data'][@{{index}}]=@{{value}};""")
+            JS("@{{self}}['_data'][@{{index}}]=@{{value}};")
         else:
             value = value.valueOf()
-            JS("""@{{self}}['_data'][@{{index}}]=@{{value}};""")
+            JS("@{{self}}['_data'][@{{index}}]=@{{value}};")
         return None
 
     def __len__(self):
@@ -329,7 +329,7 @@ class Float32Array(TypedArray):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{self}}['_data'][@{{index}}];""")
+        return JS("@{{self}}['_data'][@{{index}}];")
 
 
 class Float64Array(TypedArray):
@@ -351,7 +351,7 @@ class Float64Array(TypedArray):
         """
         Get TypedArray element by index.
         """
-        return JS("""@{{self}}['_data'][@{{index}}];""")
+        return JS("@{{self}}['_data'][@{{index}}];")
 
 
 class CanvasPixelArray(TypedArray):
@@ -1247,18 +1247,18 @@ class Ndarray(object):
         else:
             if pyjs_mode.optimized:
                 for index in range(self._data._data.length):
-                    JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}};""")
+                    JS("@{{self}}['_data']['_data'][@{{index}}]=@{{data}};")
             else:
                 data = data.valueOf()
                 for index in range(self._data._data.length):
-                    JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}};""")
+                    JS("@{{self}}['_data']['_data'][@{{index}}]=@{{data}};")
             return None
         if dataLn == self._data._data.length:
             for index in range(self._data._data.length):
-                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}}[@{{index}}];""")
+                JS("@{{self}}['_data']['_data'][@{{index}}]=@{{data}}[@{{index}}];")
         else:
             for index in range(self._data._data.length):
-                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{data}}[@{{index}}%@{{dataLn}}];""")
+                JS("@{{self}}['_data']['_data'][@{{index}}]=@{{data}}[@{{index}}%@{{dataLn}}];")
         return None
 
     def fill(self, value):
@@ -1267,11 +1267,11 @@ class Ndarray(object):
         """
         if pyjs_mode.optimized:
             for index in range(self._data._data.length):
-                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{value}};""")
+                JS("@{{self}}['_data']['_data'][@{{index}}]=@{{value}};")
         else:
             value = value.valueOf()
             for index in range(self._data._data.length):
-                JS("""@{{self}}['_data']['_data'][@{{index}}]=@{{value}};""")
+                JS("@{{self}}['_data']['_data'][@{{index}}]=@{{value}};")
         return None
 
     def copy(self):
@@ -1794,9 +1794,9 @@ def typeOf(obj):
     Return typeof obj.
     """
     if pyjs_mode.optimized:
-        return JS("""typeof @{{obj}};""")
+        return JS("typeof @{{obj}};")
     else:
-        return JS("""typeof @{{obj}}['valueOf']();""")
+        return JS("typeof @{{obj}}['valueOf']();")
 
 
 class Pyjs_Mode(object):
