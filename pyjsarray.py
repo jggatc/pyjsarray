@@ -93,30 +93,18 @@ class TypedArray(object):
         return typedarray
 
     def __str__(self):
-        """
-        Return string representation of TypedArray object.
-        """
         return self._data.toString()
 
     def __iter__(self):
-        """
-        Iterate over TypedArray object.
-        """
         index = 0
         while index < self._data.length:
             yield self[index]
             index += 1
 
     def __getitem__(self, index):
-        """
-        Get TypedArray element by index.
-        """
         return JS("@{{int}}(@{{self}}['_data'][@{{index}}]);")
 
     def __setitem__(self, index, value):
-        """
-        Set TypedArray element by index.
-        """
         if pyjs_mode.optimized:
             JS("@{{self}}['_data'][@{{index}}]=@{{value}};")
         else:
@@ -125,9 +113,6 @@ class TypedArray(object):
         return None
 
     def __len__(self):
-        """
-        Get TypedArray array length.
-        """
         return self._data.length
 
     def set(self, data, offset=0):
@@ -326,9 +311,6 @@ class Float32Array(TypedArray):
                 raise
 
     def __getitem__(self, index):
-        """
-        Get TypedArray element by index.
-        """
         return JS("@{{self}}['_data'][@{{index}}];")
 
 
@@ -348,9 +330,6 @@ class Float64Array(TypedArray):
                 raise
 
     def __getitem__(self, index):
-        """
-        Get TypedArray element by index.
-        """
         return JS("@{{self}}['_data'][@{{index}}];")
 
 
@@ -365,9 +344,6 @@ class CanvasPixelArray(TypedArray):
         self._superIndex = (0,0)
 
     def __iter__(self):
-        """
-        Iterate over TypedArray object.
-        """
         if not self._superArray:
             TypedArray.__iter__(self)
         else:
@@ -377,18 +353,12 @@ class CanvasPixelArray(TypedArray):
                 index += 1
 
     def __getitem__(self, index):
-        """
-        Get TypedArray element by index.
-        """
         if not self._superArray:
             return TypedArray.__getitem__(self, index)
         else:
             return self._superArray.__getitem__(index+self._superIndex[0])
 
     def __setitem__(self, index, value):
-        """
-        Set TypedArray element by index.
-        """
         if not self._superArray:
             TypedArray.__setitem__(self, index, value)
         else:
@@ -1359,12 +1329,21 @@ class Ndarray(object):
 class NP(object):
 
     def zeros(self, size, dtype):
+        """
+        Return Ndarray of size and dtype with zeroed values.
+        """
         return Ndarray(size, dtype)
 
     def swapaxes(self, array, axis1, axis2):
+        """
+        Return array with axes swapped.
+        """
         return array.swapaxes(axis1, axis2)
 
     def append(self, array, values):
+        """
+        Return Ndarray set with array extended with values.
+        """
         if isinstance(values[0], (list,tuple,TypedArray)):
             values = [value for dat in values for value in dat]
         newarray = Ndarray(len(array)+len(values), array._dtype)
@@ -1520,9 +1499,6 @@ class BitSet(object):
         self._data = self.__typedarray( _ceil(self._width/(self._bit*1.0)) )
 
     def __str__(self):
-        """
-        Return string representation of BitSet object.
-        """
         v = {True:'1', False:'0'}
         s = []
         for i in range(self.size()):
@@ -1532,9 +1508,6 @@ class BitSet(object):
         return ''.join(s)
 
     def __repr__(self):
-        """
-        Return string of the indexes of the set bits.
-        """
         setBit = []
         for index in range(self._width):
             if self.get(index):
@@ -1542,30 +1515,18 @@ class BitSet(object):
         return "{" + ", ".join(setBit) + "}"
 
     def __getitem__(self, index):
-        """
-        Get bit by index.
-        """
         return self.get(index)
 
     def __setitem__(self, index, value):
-        """
-        Set bit by index.
-        """
         self.set(index, value)
 
     def __len__(self):
-        """
-        Get bit length.
-        """
         for index in range(self._width-1, -1, -1):
             if self.get(index):
                 break
         return index+1
 
     def __iter__(self):
-        """
-        Iterate over bits.
-        """
         index = 0
         while index < self._width:
             yield self.get(index)
