@@ -1760,7 +1760,7 @@ def typeOf(obj):
         return JS("typeof @{{obj}}['valueOf']();")
 
 
-class Pyjs_Mode(object):
+class PyjsMode(object):
 
     def __init__(self):
         self.strict, self.optimized = self._setmode()
@@ -1775,7 +1775,7 @@ class Pyjs_Mode(object):
         else:
             return False, True
 
-pyjs_mode = Pyjs_Mode()
+pyjs_mode = PyjsMode()
 
 
 #depreciated
