@@ -19,8 +19,8 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-#PyjsArray version 0.53
-#Project Site: http://gatc.ca/
+#PyjsArray version 0.54
+#Project Site: https://gatc.ca/
 
 from math import ceil as _ceil
 try:
@@ -28,6 +28,7 @@ try:
 except ImportError:
     pass
 import sys
+
 if sys.version_info < (3,):
     range = xrange
 
