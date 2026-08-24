@@ -1,0 +1,21 @@
+0.56    2026-05-10
+-update docstrings.
+
+0.55    2025-01-18
+-remove unnecessary statements.
+
+0.54    2021-04-06
+
+-update ndarray and bitset for optimization.
+-update bitset array to avoid js reserved work.
+-update pyjsarray typedarray constructor for chrome compatibility.
+-update pyjsarray typedarray constructor when type not implemented.
+-update pyjsarray imageData object for IE compatibility.
+-add pyjsarray ndarray methods.
+-update pyjsarray with ndarray and imagedata objects.
+-add pyjsarray and pyjsbitset based on javascript typedArray object.
+-update for python 2/3 compatibility.
+
+0.5     May 26, 2013
+-initial commit
+
